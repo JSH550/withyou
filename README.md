@@ -10,7 +10,13 @@
 - Spring Data JPA
 - 
 
+## 기능 구현
+- 회원가입 기능
+  -단순하게 구현, email,password,닉네임 필수정보
+
 ## ToDo
+- 회원가입 기능
+    - server side에서 email,password,닉네임 검증
 - Login 기능 구현
   - E-mail 로그인
 - 도/시 별 카테고리 분리
