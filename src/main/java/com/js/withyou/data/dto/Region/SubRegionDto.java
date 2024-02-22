@@ -1,0 +1,17 @@
+package com.js.withyou.data.dto.Region;
+
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class SubRegionDto {
+    @NotBlank(message = "세부지역 Id 정보 없음")
+    private Long subRegionId;
+    @NotBlank(message = "세부지역 이름 정보 없음")
+    private String subRegionName; //
+    @NotBlank(message = "지역 이름 정보 없음")
+    private Long regionId;
+
+}
