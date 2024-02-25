@@ -12,6 +12,11 @@ public class RegionDto {
 
     @NotBlank
     private Long regionId;
+
+
     @NotBlank
     private String regionName;
+
+    private String regionShortName; // 시도명의 줄임말 필드,ex) 충남 충북
+
 }
