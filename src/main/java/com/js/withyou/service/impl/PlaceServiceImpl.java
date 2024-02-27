@@ -2,7 +2,8 @@ package com.js.withyou.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.js.withyou.data.dto.PlaceSaveDto;
+import com.js.withyou.data.dto.place.PlaceSaveDto;
+import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place;
 import com.js.withyou.data.entity.SubRegion;
@@ -12,7 +13,6 @@ import com.js.withyou.repository.SubRegionRepository;
 import com.js.withyou.service.PlaceService;
 import com.js.withyou.service.RegionService;
 import com.js.withyou.service.SubRegionService;
-import com.sun.source.tree.BinaryTree;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -98,6 +98,19 @@ public class PlaceServiceImpl implements PlaceService {
             Place savedPlace = placeRepository.save(createPlace);
         }
 
+    }
+
+    //placeId로 place 찾는 메서드, 검색결과가 없으면 Exception으로 던짐
+    @Override
+    public PlaceDto findPlaceByPlaceId(Long placeId) {
+        PlaceDto placeDto = new PlaceDto();
+        Optional<Place> foundPlace = placeRepository.findById(placeId);
+        if (foundPlace.isPresent()){
+            Place place = foundPlace.get();
+           return placeDto.setPlaceDto(place);
+        }else {
+            throw new IllegalArgumentException("Place ID에 해당하는 장소를 찾을 수 없습니다. placeId={} " + placeId);
+        }
     }
 
 //    public void saveXmlToDataBase(String filePath) {
