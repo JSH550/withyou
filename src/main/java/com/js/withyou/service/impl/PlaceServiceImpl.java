@@ -31,6 +31,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,11 +108,32 @@ public class PlaceServiceImpl implements PlaceService {
         Optional<Place> foundPlace = placeRepository.findById(placeId);
         if (foundPlace.isPresent()){
             Place place = foundPlace.get();
-           return placeDto.setPlaceDto(place);
+           return placeDto.convertToPlaceDto(place);
         }else {
             throw new IllegalArgumentException("Place ID에 해당하는 장소를 찾을 수 없습니다. placeId={} " + placeId);
         }
     }
+
+    //특정 keyword를 포함한 place 검색
+    @Override
+    public List<PlaceDto> findPlaceByKeyword(String keyword) {
+        List<Place> foundPlaceList = placeRepository.findByPlaceNameContaining(keyword);
+        //DTO 저장용 List 객체
+        List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
+        //place entity DTO로 변환하여 DtoList에 저장
+        for (Place place : foundPlaceList) {
+            PlaceDto placeDto = new PlaceDto();
+            foundPlaceDtoList.add(placeDto.convertToPlaceDto(place));
+        }
+        return foundPlaceDtoList;
+    }
+
+    public PlaceDto convertPlaceDto(Place place){
+        PlaceDto placeDto = new PlaceDto();
+        placeDto.convertToPlaceDto(place);
+        return placeDto;
+    }
+
 
 //    public void saveXmlToDataBase(String filePath) {
 ////        PlaceServiceImpl placeService = new PlaceServiceImpl();

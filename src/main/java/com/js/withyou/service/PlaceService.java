@@ -5,6 +5,8 @@ import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.SubRegion;
 
+import java.util.List;
+
 public interface PlaceService {
     void parsXmlFile();
 
@@ -13,4 +15,6 @@ public interface PlaceService {
     void savePlace(PlaceSaveDto placeSaveDto, Category category, SubRegion subRegion);
 
     PlaceDto findPlaceByPlaceId(Long placeId);
+
+    List<PlaceDto> findPlaceByKeyword(String keyword);
 }
