@@ -10,9 +10,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -49,12 +47,66 @@ public class PlaceController {
     @GetMapping("/places/{placeId}")
     public String showPlaceDetail(@PathVariable @NotNull Long placeId,
                                   Model model) {
-        log.info("요청된 placeId={}",placeId);
+        log.info("요청된 placeId={}", placeId);
 //        id값 조회해서 해당 place 정보 view로 넘겨주세요
         PlaceDto placeDto = placeService.findPlaceByPlaceId(placeId);
-        model.addAttribute("placeDto",placeDto);
+        log.info("요청된 장소의 위도={},경도={}", placeDto.getPlaceLatitude(), placeDto.getPlaceLongitude());
+
+        model.addAttribute("placeDto", placeDto);
         return "/place/place-detail";
     }
+
+    @GetMapping("/search")
+    public String showSearchPlace(@RequestParam(name = "query", required = false) String searchKeyword
+            , Model model) {
+
+        log.info("searchKeyword={}", searchKeyword);
+        //쿼리파라미터 값이 null 이거나, 쿼리파라미터가 null이면 model값없이 view로 이동
+        if (searchKeyword == null||searchKeyword.isEmpty()) {
+            log.info("검색어 미입력");
+            return "/place/place-search";
+        }
+
+//        //시설 이름 으로 검색
+//        List<PlaceDto> placeDtoList = placeService.findPlaceByKeyword(searchKeyword);
+//        //검색한 결과가 없을경우 search page로 리다이렉트
+//        model.addAttribute("placeDtoList", placeDtoList);
+
+
+        //시설 카테고리로 검색
+        List<PlaceDto> placeDtoList = placeService.findPlaceByCategory(searchKeyword);
+
+        //상세 지역으로 검색
+        //1.시도 정보로 검색 -> 풀네임, 줄임말 둘다임
+//        placeService.
+        //2. 시군구 정보로 검색
+
+
+        model.addAttribute("placeDtoList", placeDtoList);
+        return "/place/place-search";
+    }
+
+    ;
+
+//    @GetMapping("/search")
+//    public String searchPlaces(@RequestParam(required = false) String searchWord,
+//                               Model model){
+//        if (searchWord.isEmpty()){
+//            return "/place/place-search";
+//        }
+//
+//        //시설 이름 으로 검색
+//        List<PlaceDto> placeDtoList = placeService.findPlaceByKeyword(searchWord);
+//        //검색한 결과가 없을경우 search page로 리다이렉트
+//        model.addAttribute("placeDtoList",placeDtoList);
+//
+//
+//        //시설 카테고리로 검색
+//
+//        //상세 지역으로 검색
+//        return "/place/place-search";
+//
+//    }
 
 
     @GetMapping("/map")
