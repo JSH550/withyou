@@ -17,4 +17,13 @@ public interface PlaceService {
     PlaceDto findPlaceByPlaceId(Long placeId);
 
     List<PlaceDto> findPlaceByKeyword(String keyword);
+
+    List<PlaceDto> findPlaceByCategory(String keyword);
+
+    List<PlaceDto> findPlaceByRegion(String keyword);
+
+    //    List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList);
+    List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList);
+
+
 }

@@ -2,6 +2,7 @@ package com.js.withyou.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.js.withyou.data.dto.Region.RegionDto;
 import com.js.withyou.data.dto.place.PlaceSaveDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
@@ -13,6 +14,7 @@ import com.js.withyou.repository.SubRegionRepository;
 import com.js.withyou.service.PlaceService;
 import com.js.withyou.service.RegionService;
 import com.js.withyou.service.SubRegionService;
+import com.sun.source.tree.BinaryTree;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -34,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -106,10 +109,10 @@ public class PlaceServiceImpl implements PlaceService {
     public PlaceDto findPlaceByPlaceId(Long placeId) {
         PlaceDto placeDto = new PlaceDto();
         Optional<Place> foundPlace = placeRepository.findById(placeId);
-        if (foundPlace.isPresent()){
+        if (foundPlace.isPresent()) {
             Place place = foundPlace.get();
-           return placeDto.convertToPlaceDto(place);
-        }else {
+            return placeDto.convertToPlaceDto(place);
+        } else {
             throw new IllegalArgumentException("Place ID에 해당하는 장소를 찾을 수 없습니다. placeId={} " + placeId);
         }
     }
@@ -128,7 +131,83 @@ public class PlaceServiceImpl implements PlaceService {
         return foundPlaceDtoList;
     }
 
-    public PlaceDto convertPlaceDto(Place place){
+    //검색어가 포함된 category를 검색하고, 해당 category에 속하는 place를 DtoList 형태로 반환합니다.
+    @Transactional
+    @Override
+    public List<PlaceDto> findPlaceByCategory(String keyword) {
+        //keyword 포함된 category Entity 검색 후 List로 저장
+        List<Category> foundCategoryList = categoryRepository.findByCategoryNameContaining(keyword);
+        //palce 정보를 저장할 DTO List 객체
+        List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
+        foundCategoryList.stream()
+                //각 category entity 에서의 palce들을 추출
+                .map(Category::getPlaces)
+                //getPlaces로 가져온 Place List를 stream으로 변환
+                .flatMap(List::stream)
+                //각 Place는 PlaceDto로 변환, foundPlaceDtoList에 저장
+                .map(place -> {
+                    PlaceDto placeDto = new PlaceDto();
+                    return placeDto.convertToPlaceDto(place);
+                })
+                .forEach(foundPlaceDtoList::add);
+        return foundPlaceDtoList;
+    }
+
+    @Transactional
+    @Override
+    public List<PlaceDto> findPlaceByRegion(String keyword) {
+        List<RegionDto> regionDtoList = regionService.getRegionByKeyword(keyword);
+        //시도 DTO에서 시군구 entity 안에 시설 정보들을 placeDtoList에 저장
+//        List<PlaceDto> foundPlaceDtoList =
+
+                regionDtoList.stream()
+                .map(RegionDto::getSubRegions)//시도 DTO에서 시군구 entity 꺼냄
+                .flatMap(List::stream)//꺼낸 시군구 entity stream으로 펼쳐줌
+                        .map(SubRegion::getSubRegionName)
+                        .forEach(System.out::println);
+//                .map(SubRegion::getPlaces)//시군구 entity에서 시설 정보 꺼냄
+//                .flatMap(List::stream)//시설 entity stream으로 펼쳐줌
+//                .map(place-> convertPlaceDto(place))//시설 entity Dto로 변환
+//                .collect(Collectors.toList());
+
+        //원본
+//        List<PlaceDto> foundPlaceDtoList = regionDtoList.stream()
+//                .map(RegionDto::getSubRegions)//시도 DTO에서 시군구 entity 꺼냄
+//                .flatMap(List::stream)//꺼낸 시군구 entity stream으로 펼쳐줌
+//                .map(SubRegion::getPlaces)//시군구 entity에서 시설 정보 꺼냄
+//                .flatMap(List::stream)//시설 entity stream으로 펼쳐줌
+//                .map(place-> convertPlaceDto(place))//시설 entity Dto로 변환
+//                .collect(Collectors.toList());
+
+        return null;
+//        for (PlaceDto placeDto : foundPlaceDtoList) {
+//            log.info("키워드로 찾은 장소={}",placeDto.getPlaceName());
+//        }
+//        return foundPlaceDtoList;
+    }
+
+    /**
+     * 주어진 시군구의 ID(subRegionId)와 mapping 되는 장소를 검색합니다.
+     *
+     * @param subRegionIdList 시군구의 ID 목록
+     * @return 해당 시군구의 장소 목록을 PlaceDto의 List 형태로 반환합니다.
+     */
+    public List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList) {
+        List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
+        for (Long subRegionId : subRegionIdList) {
+            List<Place> foundPlaceList = placeRepository.findBySubregionId(subRegionId);//시군구 Id로 Place 검색
+            for (Place place : foundPlaceList) {
+                foundPlaceDtoList.add(convertPlaceDto(place));
+            }
+        }
+        return foundPlaceDtoList;
+    }
+
+
+    ;
+
+
+    public PlaceDto convertPlaceDto(Place place) {
         PlaceDto placeDto = new PlaceDto();
         placeDto.convertToPlaceDto(place);
         return placeDto;
@@ -205,7 +284,7 @@ public class PlaceServiceImpl implements PlaceService {
                 log.info(i + "번째 기관정보");
                 Element item = (Element) nodeList.item(i);
                 //list에서 원하는 tag의 값들 추출해서 로깅
-                 savePlaceFromXmlData(item, i);
+                savePlaceFromXmlData(item, i);
             }
             if (nodeList.getLength() == 0) {
                 // <XPos> 요소가 없는 경우 메시지 출력
