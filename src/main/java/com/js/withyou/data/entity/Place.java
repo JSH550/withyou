@@ -1,6 +1,6 @@
 package com.js.withyou.data.entity;
 
-import com.js.withyou.data.dto.PlaceSaveDto;
+import com.js.withyou.data.dto.place.PlaceSaveDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class Place {
     private double placeLongitude;//경도 X축
 
     //카테고리에 매핑
-    @ManyToOne
+    @ManyToOne()
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
