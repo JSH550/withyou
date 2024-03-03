@@ -6,6 +6,7 @@ import com.js.withyou.data.dto.Region.SubRegionCreateDto;
 import com.js.withyou.data.dto.Region.SubRegionDto;
 import com.js.withyou.data.entity.SubRegion;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface SubRegionService {
@@ -18,5 +19,7 @@ public interface SubRegionService {
 
 //    SubRegionDto getSubRegionByRegionNameAndSubRegionName(String regionName, String subRegionName);
     SubRegion getSubRegionByRegionNameAndSubRegionName(String regionName, String subRegionName);
+
+    List<Long> findSubRegionIdsByKeyword(String searchKeyword);
 
 }

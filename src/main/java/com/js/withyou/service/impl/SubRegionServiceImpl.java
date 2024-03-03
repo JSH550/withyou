@@ -1,20 +1,20 @@
 package com.js.withyou.service.impl;
 
+import com.js.withyou.data.dto.Region.RegionDto;
 import com.js.withyou.data.dto.Region.SubRegionDto;
+import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Region;
 import com.js.withyou.data.entity.SubRegion;
 import com.js.withyou.repository.RegionRepository;
 import com.js.withyou.repository.SubRegionRepository;
+import com.js.withyou.service.RegionService;
 import com.js.withyou.service.SubRegionService;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Pattern;
 @Slf4j
 @Service
@@ -22,9 +22,11 @@ public class SubRegionServiceImpl implements SubRegionService {
 
    private final SubRegionRepository subRegionRepository;
     private final RegionRepository regionRepository;
-    public SubRegionServiceImpl(SubRegionRepository subRegionRepository, RegionRepository regionRepository) {
+    private final RegionService regionService;
+    public SubRegionServiceImpl(SubRegionRepository subRegionRepository, RegionRepository regionRepository, RegionService regionService) {
         this.subRegionRepository = subRegionRepository;
         this.regionRepository = regionRepository;
+        this.regionService = regionService;
     }
 
 
@@ -64,6 +66,31 @@ public class SubRegionServiceImpl implements SubRegionService {
         }
 
     }
+
+    /**
+     * 검색 키워드를 기반으로 지역의 시군구(SubRegion) ID 리스트를 조회하는 메서드
+     * @param searchKeyword 검색 키워드
+     * @return 시군구 ID 리스트, 검색 키워드 or 시도(Region)검색정보가 없을경우 빈 리스트 반환
+     */
+    @Override
+    public List<Long> findSubRegionIdsByKeyword(String searchKeyword){
+        if (searchKeyword==null){//키워드 파라미터가 null이면 빈 리스트 반환
+            return Collections.emptyList();
+        }
+        List<RegionDto> foundRegionList = regionService.getRegionByKeyword(searchKeyword);//keyword로 시도 데이터 검색
+        if (foundRegionList.isEmpty()){//검색된 시도 데이터가 없으면 빈 리스트 반환
+            return Collections.emptyList();
+        }
+        List<Long> subRegionIds = new ArrayList<>();//시군구 entity의 ID를 저장하기 위한 List 추가
+        for (RegionDto regionDto : foundRegionList) {
+            List<SubRegion> subRegions = regionDto.getSubRegions();
+            for (SubRegion subRegion : subRegions) {
+                subRegionIds.add(subRegion.getSubRegionId());//반복문으로 모든 시군구 entity의 ID값을 List에 저장
+            }
+        }
+        return subRegionIds;
+    }
+
 
     public SubRegionDto convertToSubRegionDto(SubRegion subRegion){
         SubRegionDto subRegionDto = new SubRegionDto();
