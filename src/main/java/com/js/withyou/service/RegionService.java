@@ -12,7 +12,11 @@ public interface RegionService {
     RegionDto getRegionById(Long RegionId);
 
     RegionDto getRegionByRegionShortName(String RegionShortName);
+
+    List<RegionDto> getRegionByKeyword(String keyword);
     SubRegionDto saveSubRegionWithRegion(Long regionId, String subRegionName);
+
+
 
 
 }
