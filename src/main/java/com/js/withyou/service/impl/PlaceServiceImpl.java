@@ -117,7 +117,11 @@ public class PlaceServiceImpl implements PlaceService {
         }
     }
 
-    //특정 keyword를 포함한 place 검색
+    /*
+     * 검색어를 포함한 장소를 조회하고 저장하는 메서드입니다.
+     * 이 메서드는 검색된 장소를 조회하기 위해 1회의 쿼리를 실행하며, 카테고리 조회1회, 시군(place) 조회 1회 3회의 쿼리를 실행합니다.
+     * 시군구(subRegion) 은 left join fetch 로 쿼리 place 조회시 같이 조회됩니다.
+     * */
     @Override
     public List<PlaceDto> findPlaceByKeyword(String keyword) {
         List<Place> foundPlaceList = placeRepository.findByPlaceNameContaining(keyword);
@@ -130,11 +134,14 @@ public class PlaceServiceImpl implements PlaceService {
         }
         return foundPlaceDtoList;
     }
-
-    //검색어가 포함된 category를 검색하고, 해당 category에 속하는 place를 DtoList 형태로 반환합니다.
+    /*
+     * 검색어를 포함한 카테고리를 조회하고, 해당 카테고리에 속하는 장소를 저장하는 메서드입니다.
+     * 이 메서드는 검색된 카테고리를 조회하기 위해 1회의 쿼리를 실행하며, 각 검색된 카테고리에 매핑된 장소를 조회하기 위해 추가적인 n회의 쿼리를 실행합니다.
+     */
     @Transactional
     @Override
     public List<PlaceDto> findPlaceByCategory(String keyword) {
+        log.info("시작");
         //keyword 포함된 category Entity 검색 후 List로 저장
         List<Category> foundCategoryList = categoryRepository.findByCategoryNameContaining(keyword);
         //palce 정보를 저장할 DTO List 객체
@@ -160,11 +167,11 @@ public class PlaceServiceImpl implements PlaceService {
         //시도 DTO에서 시군구 entity 안에 시설 정보들을 placeDtoList에 저장
 //        List<PlaceDto> foundPlaceDtoList =
 
-                regionDtoList.stream()
+        regionDtoList.stream()
                 .map(RegionDto::getSubRegions)//시도 DTO에서 시군구 entity 꺼냄
                 .flatMap(List::stream)//꺼낸 시군구 entity stream으로 펼쳐줌
-                        .map(SubRegion::getSubRegionName)
-                        .forEach(System.out::println);
+                .map(SubRegion::getSubRegionName)
+                .forEach(System.out::println);
 //                .map(SubRegion::getPlaces)//시군구 entity에서 시설 정보 꺼냄
 //                .flatMap(List::stream)//시설 entity stream으로 펼쳐줌
 //                .map(place-> convertPlaceDto(place))//시설 entity Dto로 변환
@@ -268,7 +275,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     public void parsXmlFile() {
         try {
-            String filePath = "C:\\Users\\tksek\\OneDrive\\test1\\인천_요양병원_list.xml"; // XML 파일 경로
+            String filePath = "C:\\Users\\tksek\\OneDrive\\test1\\인천_상급종합병원_list.xml"; // XML 파일 경로
             File inputFile = new File(new String(filePath.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
             //xml 파싱을 위한 인스턴스 형성
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -341,6 +348,33 @@ public class PlaceServiceImpl implements PlaceService {
         } else {
             return "0"; // 또는 다른 기본값을 반환할 수 있습니다.
         }
+
+
+    }
+
+    /*
+     * 컨트롤러에서 검색어를 넘겨받으면 그 검색어를 바탕으로 시설을 검색합니다.
+     * 1.키워드로 카테고리 검색 후 반환값이 null 이 아니면, 해당 카테고리 ID와 매핑된 시설을 저장합니다.
+     * 2.키워드로 시설명 검색 후 반환값이 null 이 아니면, 해당 시설들을 저장합니다.
+     * 3.키워드로 시도 정보 검색 후 반환값이 null 이 아니면, 해당 시도 하위 시군구 정보로 매핑된 시설을 저장합니다.
+     * @return 저장된 시군구(Place)정보를 List로 반환합니다.
+     */
+    @Override
+    public List<PlaceDto> searchPlacesByKeyWord(String searchKeyword) {
+        List<PlaceDto> placeDtoList = new ArrayList<>();//검색 결과 저장을 위한 PlaceDtoList
+        // 1. 시설 카테고리로 검색
+//        List<PlaceDto> placeDtoListByCategory = findPlaceByCategory(searchKeyword);
+        // 2. 시설 이름으로 검색
+        List<PlaceDto> placeDtoListByKeyword = findPlaceByKeyword(searchKeyword);
+        // 3. 지역으로 검색
+//        List<Long> subRegionIdsByKeyword = subRegionService.findSubRegionIdsByKeyword(searchKeyword);
+//        List<PlaceDto> placeDtoListBySubRegionId = findPlaceBySubRegionId(subRegionIdsByKeyword);
+
+//        placeDtoList.addAll(placeDtoListByCategory);
+        placeDtoList.addAll(placeDtoListByKeyword);
+//        placeDtoList.addAll(placeDtoListBySubRegionId);
+
+        return placeDtoList;
 
 
     }

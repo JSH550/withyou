@@ -26,4 +26,6 @@ public interface PlaceService {
     List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList);
 
 
+    List<PlaceDto> searchPlacesByKeyWord(String searchKeyword);
+
 }
