@@ -2,7 +2,8 @@ package com.js.withyou.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.js.withyou.data.dto.Region.RegionDto;
+import com.js.withyou.data.dto.CategoryDto;
+import com.js.withyou.data.dto.Region.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceSaveDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
@@ -11,10 +12,10 @@ import com.js.withyou.data.entity.SubRegion;
 import com.js.withyou.repository.CategoryRepository;
 import com.js.withyou.repository.PlaceRepository;
 import com.js.withyou.repository.SubRegionRepository;
+import com.js.withyou.service.CategoryService;
 import com.js.withyou.service.PlaceService;
 import com.js.withyou.service.RegionService;
 import com.js.withyou.service.SubRegionService;
-import com.sun.source.tree.BinaryTree;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -49,6 +50,8 @@ public class PlaceServiceImpl implements PlaceService {
 
     private final PlaceRepository placeRepository;
 
+    private final CategoryService categoryService;
+
     private final CategoryRepository categoryRepository;
     // 수정된 부분: 인스턴스 변수로 변경하여 @Value 어노테이션이 제대로 동작하도록 함
 //    @Value("${kakao.restapi.key}")
@@ -57,11 +60,12 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public PlaceServiceImpl(RegionService regionService, SubRegionService subRegionService, SubRegionRepository subRegionRepository, PlaceRepository placeRepository, CategoryRepository categoryRepository) {
+    public PlaceServiceImpl(RegionService regionService, SubRegionService subRegionService, SubRegionRepository subRegionRepository, PlaceRepository placeRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
         this.regionService = regionService;
         this.subRegionService = subRegionService;
         this.subRegionRepository = subRegionRepository;
         this.placeRepository = placeRepository;
+        this.categoryService = categoryService;
         this.categoryRepository = categoryRepository;
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
@@ -104,7 +108,13 @@ public class PlaceServiceImpl implements PlaceService {
 
     }
 
-    //placeId로 place 찾는 메서드, 검색결과가 없으면 Exception으로 던짐
+    /**
+     * 장소 ID를 기반으로 해당하는 장소 정보를 조회합니다.
+     *
+     * @param placeId 조회할 장소의 ID
+     * @return 조회된 장소 정보를 담은 DTO 객체
+     * @throws IllegalArgumentException 조회된 장소가 없을 경우 발생하는 예외
+     */
     @Override
     public PlaceDto findPlaceByPlaceId(Long placeId) {
         PlaceDto placeDto = new PlaceDto();
@@ -117,23 +127,28 @@ public class PlaceServiceImpl implements PlaceService {
         }
     }
 
-    /*
-     * 검색어를 포함한 장소를 조회하고 저장하는 메서드입니다.
-     * 이 메서드는 검색된 장소를 조회하기 위해 1회의 쿼리를 실행하며, 카테고리 조회1회, 시군(place) 조회 1회 3회의 쿼리를 실행합니다.
-     * 시군구(subRegion) 은 left join fetch 로 쿼리 place 조회시 같이 조회됩니다.
-     * */
+    /**
+     * 특정 검색어를 포함한 장소를 조회하고, 해당 장소 정보를 저장하는 메서드입니다.
+     * 이 메서드는 지정된 검색어를 포함하는 장소를 조회하기 위해 1회의 쿼리를 실행합니다.
+     * 조회된 장소에 연결된 카테고리와 시군구(SubRegion) 정보는 left join fetch를 사용하여 함께 조회됩니다.
+     *
+     * @param keyword 조회할 장소명에 포함된 키워드
+     * @return 특정 검색어를 포함한 장소의 정보를 담은 DTO 목록
+     */
     @Override
     public List<PlaceDto> findPlaceByKeyword(String keyword) {
+        // 주어진 키워드를 포함하는 장소를 조회
         List<Place> foundPlaceList = placeRepository.findByPlaceNameContaining(keyword);
-        //DTO 저장용 List 객체
+        // 조회된 장소 정보를 저장할 DTO 목록 생성
         List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
-        //place entity DTO로 변환하여 DtoList에 저장
+        // 조회된 각 장소에 대해 DTO로 변환하여 목록에 추가
         for (Place place : foundPlaceList) {
             PlaceDto placeDto = new PlaceDto();
             foundPlaceDtoList.add(placeDto.convertToPlaceDto(place));
         }
         return foundPlaceDtoList;
     }
+
     /*
      * 검색어를 포함한 카테고리를 조회하고, 해당 카테고리에 속하는 장소를 저장하는 메서드입니다.
      * 이 메서드는 검색된 카테고리를 조회하기 위해 1회의 쿼리를 실행하며, 각 검색된 카테고리에 매핑된 장소를 조회하기 위해 추가적인 n회의 쿼리를 실행합니다.
@@ -141,56 +156,12 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     @Override
     public List<PlaceDto> findPlaceByCategory(String keyword) {
-        log.info("시작");
-        //keyword 포함된 category Entity 검색 후 List로 저장
-        List<Category> foundCategoryList = categoryRepository.findByCategoryNameContaining(keyword);
-        //palce 정보를 저장할 DTO List 객체
-        List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
-        foundCategoryList.stream()
-                //각 category entity 에서의 palce들을 추출
-                .map(Category::getPlaces)
-                //getPlaces로 가져온 Place List를 stream으로 변환
-                .flatMap(List::stream)
-                //각 Place는 PlaceDto로 변환, foundPlaceDtoList에 저장
-                .map(place -> {
-                    PlaceDto placeDto = new PlaceDto();
-                    return placeDto.convertToPlaceDto(place);
-                })
-                .forEach(foundPlaceDtoList::add);
-        return foundPlaceDtoList;
-    }
-
-    @Transactional
-    @Override
-    public List<PlaceDto> findPlaceByRegion(String keyword) {
-        List<RegionDto> regionDtoList = regionService.getRegionByKeyword(keyword);
-        //시도 DTO에서 시군구 entity 안에 시설 정보들을 placeDtoList에 저장
-//        List<PlaceDto> foundPlaceDtoList =
-
-        regionDtoList.stream()
-                .map(RegionDto::getSubRegions)//시도 DTO에서 시군구 entity 꺼냄
-                .flatMap(List::stream)//꺼낸 시군구 entity stream으로 펼쳐줌
-                .map(SubRegion::getSubRegionName)
-                .forEach(System.out::println);
-//                .map(SubRegion::getPlaces)//시군구 entity에서 시설 정보 꺼냄
-//                .flatMap(List::stream)//시설 entity stream으로 펼쳐줌
-//                .map(place-> convertPlaceDto(place))//시설 entity Dto로 변환
-//                .collect(Collectors.toList());
-
-        //원본
-//        List<PlaceDto> foundPlaceDtoList = regionDtoList.stream()
-//                .map(RegionDto::getSubRegions)//시도 DTO에서 시군구 entity 꺼냄
-//                .flatMap(List::stream)//꺼낸 시군구 entity stream으로 펼쳐줌
-//                .map(SubRegion::getPlaces)//시군구 entity에서 시설 정보 꺼냄
-//                .flatMap(List::stream)//시설 entity stream으로 펼쳐줌
-//                .map(place-> convertPlaceDto(place))//시설 entity Dto로 변환
-//                .collect(Collectors.toList());
-
-        return null;
-//        for (PlaceDto placeDto : foundPlaceDtoList) {
-//            log.info("키워드로 찾은 장소={}",placeDto.getPlaceName());
-//        }
-//        return foundPlaceDtoList;
+        //검색어를 포함한 category의 DTO List, Place는 DTO로 저장되어있음
+        List<CategoryDto> foundCategories = categoryService.findCategoriesByKeyWord(keyword);
+        return foundCategories.stream()
+                .map(CategoryDto::getPlaces)
+                .flatMap(List::stream)//getPlaces로 가져온 PlaceDTO List를 stream으로 변환
+                .collect(Collectors.toList());//List로 저장하여 반환
     }
 
     /**
@@ -209,17 +180,57 @@ public class PlaceServiceImpl implements PlaceService {
         }
         return foundPlaceDtoList;
     }
+    /**
+     * 주어진 하위 지역(SubRegionDto) 목록에서 장소(PlaceDto)를 검색합니다.
+     * 각 하위 지역에는 여러 개의 장소가 연결되어 있을 수 있습니다.
+     *
+     * @param subRegionDtoList 하위 지역(SubRegionDto) 목록
+     * @return 주어진 하위 지역 목록에 포함된 모든 장소(PlaceDto)의 리스트를 반환합니다.
+     */
+    @Override
+    public List<PlaceDto> findPlaceBySubRegions(List<SubRegionDto> subRegionDtoList) {
+        List<PlaceDto> placeDtoList = subRegionDtoList.stream()
+                .flatMap(subRegionDto -> {
+                    return subRegionDto.getPlaces().stream();
+                }).collect(Collectors.toList());
+        return placeDtoList;
+    }
+
+    /*
+     * 컨트롤러에서 검색어를 넘겨받으면 그 검색어를 바탕으로 시설을 검색합니다.
+     * 1.키워드로 카테고리 검색 후 반환값이 null 이 아니면, 해당 카테고리 ID와 매핑된 시설을 저장합니다.
+     * 2.키워드로 시설명 검색 후 반환값이 null 이 아니면, 해당 시설들을 저장합니다.
+     * 3.키워드로 시도 정보 검색 후 반환값이 null 이 아니면, 해당 시도 하위 시군구 정보로 매핑된 시설을 저장합니다.
+     * @return 저장된 시군구(Place)정보를 List로 반환합니다.
+     */
+    @Override
+    public List<PlaceDto> searchPlacesByKeyWord(String searchKeyword) {
+        List<PlaceDto> placeDtoList = new ArrayList<>();//검색 결과 저장을 위한 PlaceDtoList
+        // 1. 시설 카테고리로 검색, 쿼리2회(카테고리 조회1 place 조회 1)
+//        log.info("카테고리로 시설 검색 검색 시작");
+//        List<PlaceDto> placeDtoListByCategory = findPlaceByCategory(searchKeyword);
+//        placeDtoList.addAll(placeDtoListByCategory);
+        // 2. 시설 이름으로 검색, 쿼리2회(place 조회 1, region 조회 1)
+//        log.info("시설 이름으로 검색 시작");
+//        List<PlaceDto> placeDtoListByKeyword = findPlaceByKeyword(searchKeyword);
+//        placeDtoList.addAll(placeDtoListByKeyword);
+        // 3. 지역으로 검색
+        log.info("지역 이름으로 검색 시작");
+        List<SubRegionDto> subRegionDtoList = regionService.findSubregionByKeyword(searchKeyword);
+        List<PlaceDto> placeDtoListBySubRegion = findPlaceBySubRegions(subRegionDtoList);
+        placeDtoList.addAll(placeDtoListBySubRegion);
 
 
-    ;
+        return placeDtoList;
 
+
+    }
 
     public PlaceDto convertPlaceDto(Place place) {
         PlaceDto placeDto = new PlaceDto();
         placeDto.convertToPlaceDto(place);
         return placeDto;
     }
-
 
 //    public void saveXmlToDataBase(String filePath) {
 ////        PlaceServiceImpl placeService = new PlaceServiceImpl();
@@ -275,7 +286,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     public void parsXmlFile() {
         try {
-            String filePath = "C:\\Users\\tksek\\OneDrive\\test1\\인천_상급종합병원_list.xml"; // XML 파일 경로
+            String filePath = "C:\\Users\\tksek\\OneDrive\\test1\\전국_요양병원_list.xml"; // XML 파일 경로
             File inputFile = new File(new String(filePath.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8));
             //xml 파싱을 위한 인스턴스 형성
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -316,7 +327,7 @@ public class PlaceServiceImpl implements PlaceService {
         // 전화번호
         String telno = Optional.ofNullable(getTagTextContent(element, "telno")).orElse("1");
 
-        // 서울시,도 정보
+        // 시,도 정보
         String sidoCdNm = Optional.ofNullable(getTagTextContent(element, "sidoCdNm")).orElse("정보없음");
 
         // 시군구 정보
@@ -352,32 +363,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     }
 
-    /*
-     * 컨트롤러에서 검색어를 넘겨받으면 그 검색어를 바탕으로 시설을 검색합니다.
-     * 1.키워드로 카테고리 검색 후 반환값이 null 이 아니면, 해당 카테고리 ID와 매핑된 시설을 저장합니다.
-     * 2.키워드로 시설명 검색 후 반환값이 null 이 아니면, 해당 시설들을 저장합니다.
-     * 3.키워드로 시도 정보 검색 후 반환값이 null 이 아니면, 해당 시도 하위 시군구 정보로 매핑된 시설을 저장합니다.
-     * @return 저장된 시군구(Place)정보를 List로 반환합니다.
-     */
-    @Override
-    public List<PlaceDto> searchPlacesByKeyWord(String searchKeyword) {
-        List<PlaceDto> placeDtoList = new ArrayList<>();//검색 결과 저장을 위한 PlaceDtoList
-        // 1. 시설 카테고리로 검색
-//        List<PlaceDto> placeDtoListByCategory = findPlaceByCategory(searchKeyword);
-        // 2. 시설 이름으로 검색
-        List<PlaceDto> placeDtoListByKeyword = findPlaceByKeyword(searchKeyword);
-        // 3. 지역으로 검색
-//        List<Long> subRegionIdsByKeyword = subRegionService.findSubRegionIdsByKeyword(searchKeyword);
-//        List<PlaceDto> placeDtoListBySubRegionId = findPlaceBySubRegionId(subRegionIdsByKeyword);
 
-//        placeDtoList.addAll(placeDtoListByCategory);
-        placeDtoList.addAll(placeDtoListByKeyword);
-//        placeDtoList.addAll(placeDtoListBySubRegionId);
-
-        return placeDtoList;
-
-
-    }
 }
 
 
