@@ -4,6 +4,7 @@ import com.js.withyou.data.dto.CategoryDto;
 import com.js.withyou.data.dto.MemberDto;
 import com.js.withyou.data.dto.Region.RegionDto;
 import com.js.withyou.data.dto.Region.SubRegionDto;
+import com.js.withyou.data.entity.SubRegion;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface RegionService {
     List<RegionDto> getRegionByKeyword(String keyword);
     SubRegionDto saveSubRegionWithRegion(Long regionId, String subRegionName);
 
-
+    List<SubRegionDto> findSubregionByKeyword(String keyword);
 
 
 }

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+
 public class RegionServiceImpl implements RegionService {
     private final RegionRepository regionRepository;
     private final SubRegionRepository subRegionRepository;
@@ -42,6 +43,25 @@ public class RegionServiceImpl implements RegionService {
             return convertToSubRegionDto(savedSubRegion);
         }
 
+    }
+
+    /**
+     * 주어진 키워드를 포함하는 하위 지역(SubRegion)을 검색하여 해당 결과를 SubRegionDto 리스트로 반환합니다.
+     * 시군구 조회에는 1회의 쿼리가 실행됩니다. (시도 정보는 JOIN FETCH를 통해 함께 로드됩니다.)
+     * 장소 조회에도 1회의 쿼리가 실행됩니다.
+     * @param keyword 검색에 사용할 키워드
+     * @return 키워드를 포함하는 하위 지역(SubRegion)의 목록을 SubRegionDto 형태로 반환합니다.
+     */
+    @Transactional
+    @Override
+    public List<SubRegionDto> findSubregionByKeyword(String keyword) {
+        List<SubRegion> bySubRegionNameContaining = subRegionRepository.findBySubRegionNameContaining(keyword);
+        List<SubRegionDto> subRegionDtos = bySubRegionNameContaining.stream()
+                .map(subRegion -> {
+                    SubRegionDto subRegionDto = new SubRegionDto();
+                    return subRegionDto.convertToSubRegionDto(subRegion);
+                }).collect(Collectors.toList());
+        return subRegionDtos;
     }
 
 
@@ -106,6 +126,12 @@ public class RegionServiceImpl implements RegionService {
         SubRegionDto subRegionDto = new SubRegionDto();
         subRegionDto.setSubRegionId(subregion.getSubRegionId());
         subRegionDto.setSubRegionName(subregion.getSubRegionName());
+        //Place entity를 DTO로 변환하여 List에 저장
+        List<PlaceDto> placeDtos = subregion.getPlaces().stream().map(place -> {
+            PlaceDto placeDto = new PlaceDto();
+            return placeDto.convertToPlaceDto(place);
+        }).collect(Collectors.toList());
+        subRegionDto.setPlaces(placeDtos);
         subRegionDto.setRegionName(subRegionDto.getRegionName());
         return subRegionDto;
     }
