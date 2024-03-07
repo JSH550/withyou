@@ -3,7 +3,7 @@ package com.js.withyou.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.js.withyou.data.dto.CategoryDto;
-import com.js.withyou.data.dto.Region.SubRegionDto;
+import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceSaveDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
@@ -11,7 +11,6 @@ import com.js.withyou.data.entity.Place;
 import com.js.withyou.data.entity.SubRegion;
 import com.js.withyou.repository.CategoryRepository;
 import com.js.withyou.repository.PlaceRepository;
-import com.js.withyou.repository.SubRegionRepository;
 import com.js.withyou.service.CategoryService;
 import com.js.withyou.service.PlaceService;
 import com.js.withyou.service.RegionService;
@@ -34,9 +33,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +43,6 @@ public class PlaceServiceImpl implements PlaceService {
     private final RegionService regionService;
     private final SubRegionService subRegionService;
 
-    private final SubRegionRepository subRegionRepository;
 
     private final PlaceRepository placeRepository;
 
@@ -60,10 +56,9 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public PlaceServiceImpl(RegionService regionService, SubRegionService subRegionService, SubRegionRepository subRegionRepository, PlaceRepository placeRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
+    public PlaceServiceImpl(RegionService regionService, SubRegionService subRegionService, PlaceRepository placeRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
         this.regionService = regionService;
         this.subRegionService = subRegionService;
-        this.subRegionRepository = subRegionRepository;
         this.placeRepository = placeRepository;
         this.categoryService = categoryService;
         this.categoryRepository = categoryRepository;
@@ -196,6 +191,17 @@ public class PlaceServiceImpl implements PlaceService {
         return placeDtoList;
     }
 
+    /**
+     * 특정 키워드로 시도를 찾고, 해당 시도에 속한 하위 시군구에 매핑된 장소를 찾는 메서드입니다.
+     *
+     * @param keyword 검색에 사용될 키워드
+     * @return 특정 키워드로 검색된 시도의 하위 시군구에 매핑된 장소 목록
+     */    @Override
+    public List<PlaceDto> findPlaceByRegionName(String keyword){
+        List<SubRegionDto> subRegionDtoList = regionService.findSubRegionsByRegionNameContainingKeyword(keyword);
+        return findPlaceBySubRegions(subRegionDtoList);
+    }
+
     /*
      * 컨트롤러에서 검색어를 넘겨받으면 그 검색어를 바탕으로 시설을 검색합니다.
      * 1.키워드로 카테고리 검색 후 반환값이 null 이 아니면, 해당 카테고리 ID와 매핑된 시설을 저장합니다.
@@ -207,24 +213,27 @@ public class PlaceServiceImpl implements PlaceService {
     public List<PlaceDto> searchPlacesByKeyWord(String searchKeyword) {
         List<PlaceDto> placeDtoList = new ArrayList<>();//검색 결과 저장을 위한 PlaceDtoList
         // 1. 시설 카테고리로 검색, 쿼리2회(카테고리 조회1 place 조회 1)
-//        log.info("카테고리로 시설 검색 검색 시작");
-//        List<PlaceDto> placeDtoListByCategory = findPlaceByCategory(searchKeyword);
-//        placeDtoList.addAll(placeDtoListByCategory);
+        log.info("카테고리로 시설 검색 검색 시작");
+        List<PlaceDto> placeDtoListByCategory = findPlaceByCategory(searchKeyword);
+        placeDtoList.addAll(placeDtoListByCategory);
         // 2. 시설 이름으로 검색, 쿼리2회(place 조회 1, region 조회 1)
-//        log.info("시설 이름으로 검색 시작");
-//        List<PlaceDto> placeDtoListByKeyword = findPlaceByKeyword(searchKeyword);
-//        placeDtoList.addAll(placeDtoListByKeyword);
-        // 3. 지역으로 검색
-        log.info("지역 이름으로 검색 시작");
+        log.info("시설 이름으로 검색 시작");
+        List<PlaceDto> placeDtoListByKeyword = findPlaceByKeyword(searchKeyword);
+        placeDtoList.addAll(placeDtoListByKeyword);
+        // 3. 시도(region) 으로 검색
+        List<PlaceDto> placeDtoListByRegionName = findPlaceByRegionName(searchKeyword);
+        placeDtoList.addAll(placeDtoListByRegionName);
+        // 4. 시군구(subRegion)으로 검색
         List<SubRegionDto> subRegionDtoList = regionService.findSubregionByKeyword(searchKeyword);
         List<PlaceDto> placeDtoListBySubRegion = findPlaceBySubRegions(subRegionDtoList);
         placeDtoList.addAll(placeDtoListBySubRegion);
 
-
+        Set<PlaceDto> uniquePlaceDtos = new HashSet<>(placeDtoList);
+        placeDtoList.clear();
+        placeDtoList.addAll(uniquePlaceDtos);
         return placeDtoList;
 
-
-    }
+            }
 
     public PlaceDto convertPlaceDto(Place place) {
         PlaceDto placeDto = new PlaceDto();

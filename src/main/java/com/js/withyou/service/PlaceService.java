@@ -1,6 +1,6 @@
 package com.js.withyou.service;
 
-import com.js.withyou.data.dto.Region.SubRegionDto;
+import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceSaveDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Category;
@@ -27,6 +27,8 @@ public interface PlaceService {
 
 
     List<PlaceDto> findPlaceBySubRegions(List<SubRegionDto> subRegionDtoList);
+
+    List<PlaceDto> findPlaceByRegionName(String keyword);
 
     List<PlaceDto> searchPlacesByKeyWord(String searchKeyword);
 
