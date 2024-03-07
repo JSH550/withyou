@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${placeDto.placeName}">상세페이지</title>
+    <link href="../../static/css/main.css" rel="stylesheet">
+    <link href="../css/main.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+    <!-- submodules=geocoder로 서브모듈 geocoder 로드 -->
+    <script type="text/javascript"
+        src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=jfjan06a18&submodules=geocoder"></script>
+
+
+</head>
+
+<body>
+    <!-- place 사진      height: calc(20rem + 10vh + 10vw); -->
+    <!-- place 정보 -->
+    <!-- 시설 종류 -->
+    <!-- 시설 명 -->
+    <!-- 시설 도로명 -->
+
+    <!-- 시설 소개글 -->
+    <!-- 시설 위치 -->
+    <!-- map height:32 rem -->
+    <!-- <div class="container row d-flex p-3 mt-5 justify-content-center" style="outline: auto;"> -->
+    <div class="container w-100  p-2  justify-content-center" style="outline: auto; background-color: gainsboro;">
+
+        <div class="row">
+            <!-- 헤더 height 5rem 입니다. -->
+            <div class="row p-1 m-0 bg-white fixed-top h-4rem o-auto align-center">
+                <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
+                <div class="col-2" onclick="goBackCurrentPage()">
+                    <!-- 화살표 이미지 -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
+                        class="bi bi-arrow-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
+                    </svg>
+                </div>
+                <div class="col-10 t-left">
+                    <span class="" style="font-size: 1.2rem;"  th:text="${placeDto.placeName}">시설명</span>
+                </div>
+
+
+            </div>
+
+
+
+
+
+            <div id="place-detail-text" class="col-12 w-100 bg-white mt-4rem" style="outline: auto;">
+                <div class="p-1 text-muted"><span th:text="${placeDto.categoryName}" class="small">시설 종류</span></div>
+                <div class="p-1"><span th:text="${placeDto.placeName}" class="h4">시설명</span></div>
+                <div class="p-1 text-muted"><span th:text="${placeDto.placeRoadAddress}" class="small">도로명</span></div>
+            </div>
+
+
+
+            <div id="list-example" class="row m-0 w-100 p-0 mt-1">
+                <!-- font size 1.2rem입니다. -->
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">병원정보</a></div>
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">진료정보</a></div>
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">병원후기</a></div>             
+            </div>
+
+
+            <!-- detail 제목은 0.9rem 입니다. -->
+            <!-- detail 세부내용은 1.25rem입니다. -->
+            <div class="mb-1 mt-1 bg-white">
+                <div class="m-1"><span style="font-size: 0.9rem;">소개</span></div>
+                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span></div>
+            </div>
+
+            <div class="mb-1 mt-1 bg-white">
+                <div class="m-1"><span style="font-size: 0.8rem;">운영 시간</span></div>
+                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span></div>
+            </div>
+
+
+            <div class="col-12 p-2 bg-white">
+                <div class="p-1"><span class="h5">위치보기</span></div>
+                <div class="p-1"><span th:text="${placeDto.placeRoadAddress}" style="outline: auto;">도로명</span></div>
+                <div class="h-32rem place-detail-map" style="outline: auto;">지도 들어갈 부분
+
+                    <div id="map" class="w-100 h-100"></div>
+
+
+
+                </div>
+
+
+            </div>
+
+            <!-- 진료정보 box입니다. -->
+            <div>
+
+                <!-- 진료과목 box입니다. -->
+                <div>
+
+                </div>
+
+            </div>
+
+            <!-- 하당 고정 네비게이션 입니다. -->
+            <div class="fixed-bottom row bg-white bottom-button-box">
+                
+                <button type="button" class="btn btn-primary col-6">채팅 문의</button>
+                <button type="button" class="btn btn-success col-6">전화 문의</button>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- <script th:inline="javascript">
+    let placeLatitude = parseFloat(/*[[${placeDto.placeLatitude}]]*/'');
+    let placeLongitude = parseFloat(/*[[${placeDto.placeLongitude}]]*/'');
+
+    console.log(`위도 ${placeLatitude}`);
+    console.log(`경도 ${placeLongitude}`);
+
+    // 지도 그리기
+	var map = new naver.maps.Map('map', {
+	    center: new naver.maps.LatLng(placeLatitude,placeLongitude),
+	    zoom: 14
+	})
+
+    //위도와 경도로 marker을 만드는 함수
+    let createMarker=(latitude,longitude,map) =>{
+    return new naver.maps.Marker({
+        position: new naver.maps.LatLng(latitude,longitude),
+        map:map,
+        animation: naver.maps.Animation.DROP//위에서 아래로 떨어지는 애니메이션
+    })
+
+
+}
+
+createMarker(37.3595704, 127.125399,map)
+
+createMarker(placeLatitude,placeLongitude,map) -->
+
+
+    </script>
+
+</body>
+
+</html>
