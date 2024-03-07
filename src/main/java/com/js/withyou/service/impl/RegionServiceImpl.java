@@ -1,7 +1,7 @@
 package com.js.withyou.service.impl;
 
 import com.js.withyou.data.dto.Region.RegionDto;
-import com.js.withyou.data.dto.Region.SubRegionDto;
+import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.Region;
 import com.js.withyou.data.entity.SubRegion;
@@ -49,6 +49,7 @@ public class RegionServiceImpl implements RegionService {
      * 주어진 키워드를 포함하는 하위 지역(SubRegion)을 검색하여 해당 결과를 SubRegionDto 리스트로 반환합니다.
      * 시군구 조회에는 1회의 쿼리가 실행됩니다. (시도 정보는 JOIN FETCH를 통해 함께 로드됩니다.)
      * 장소 조회에도 1회의 쿼리가 실행됩니다.
+     *
      * @param keyword 검색에 사용할 키워드
      * @return 키워드를 포함하는 하위 지역(SubRegion)의 목록을 SubRegionDto 형태로 반환합니다.
      */
@@ -94,7 +95,7 @@ public class RegionServiceImpl implements RegionService {
     //검색어로 시도 검색하여 List에 저장, 반환해주는 메서드
     @Transactional
     @Override
-    public List<RegionDto> getRegionByKeyword (String keyword) {
+    public List<RegionDto> getRegionByKeyword(String keyword) {
         List<Region> foundRegionList = regionRepository.findRegionsWithSubRegionsAndPlacesByNameContaining(keyword);
         //검색어로 지역이름 검색 결과가 없을시, 검색어로 시도 축약어 검색
         if (foundRegionList.isEmpty()) {
@@ -112,13 +113,30 @@ public class RegionServiceImpl implements RegionService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public List<SubRegionDto> findSubRegionsByRegionNameContainingKeyword(String keyword) {
+        return regionRepository.findSubRegionsByRegionNameContaining(keyword).stream()
+                .map(SubRegion-> {
+                    SubRegionDto subRegionDto = new SubRegionDto();
+                   return subRegionDto.convertToSubRegionDto(SubRegion);
+                }).collect(Collectors.toList());
+    }
+
 
     public RegionDto convertToRegionDto(Region region) {
         RegionDto regionDto = new RegionDto();
         regionDto.setRegionId(region.getRegionId());
         regionDto.setRegionName(region.getRegionName());
         regionDto.setRegionShortName(region.getRegionShortName());
-        regionDto.setSubRegions(region.getSubRegions());
+        //SubRegion DTO로 변환해서 저장
+        List<SubRegionDto> subRegionDtoList = region.getSubRegions().stream().map(subregion -> {
+                    SubRegionDto subRegionDto = new SubRegionDto();
+                    return subRegionDto.convertToSubRegionDto(subregion);
+                }
+        ).collect(Collectors.toList());
+        regionDto.setSubRegions(subRegionDtoList);
+
         return regionDto;
     }
 
@@ -150,8 +168,6 @@ public class RegionServiceImpl implements RegionService {
 
 
     }
-
-
 
 
 }
