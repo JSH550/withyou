@@ -1,4 +1,4 @@
-package com.js.withyou.data.dto.Region;
+package com.js.withyou.data.dto.SubRegion;
 
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.SubRegion;

@@ -1,4 +1,4 @@
-package com.js.withyou.data.dto.Region;
+package com.js.withyou.data.dto.SubRegion;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

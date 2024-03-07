@@ -1,14 +1,11 @@
-package com.js.withyou.data.dto.Region;
+package com.js.withyou.data.dto.SubRegion;
 
-import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.entity.SubRegion;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-import java.util.stream.Collectors;
 //subRegion의 이름만 전송하는 DTO입니다.
 @Getter
 @Setter
