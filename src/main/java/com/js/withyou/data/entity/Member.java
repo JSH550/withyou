@@ -1,8 +1,11 @@
 package com.js.withyou.data.entity;
 
+import com.js.withyou.data.entity.Place.Review;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,9 +20,13 @@ public class Member {
     private String memberEmail;
 
     private String memberPassword;
-
     //이름
     private String memberName;
+    
+    //회원이 작성한 리뷰
+    @OneToMany
+    private List<Review> reviews;
+    
     //meber 저장 메서드
     public void saveMember(String memberEmail,String memberName,String memberPassword){
         this.memberEmail=memberEmail;
