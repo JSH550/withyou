@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title th:text="${placeDto.placeName}">리뷰페이지</title>
+    <link href="../../static/css/main.css" rel="stylesheet">
+    <link href="../css/main.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" rel="stylesheet">
+    <script crossorigin="anonymous"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container ">
+        <div id="place-name"></div>
+        <!-- 헤더입니다. -->
+        <div class="row p-1 m-0 bg-white fixed-top h-4rem align-center">
+            <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
+            <div class="col-2" onclick="redirectPlaceDetailPage()">
+                <!-- 화살표 이미지 -->
+                <svg class="bi bi-arrow-left" fill="currentColor" height="30" viewBox="0 0 16 16"
+                    width="30" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+                        fill-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="col-10">
+                <span class="p-1" style="font-size: 1.1rem;" th:text="${placeDto.placeName}">시설명</span>
+            </div>
+        </div>
+
+
+        <!-- 유저 정보입니다. -->
+        <div class="mt-4rem">
+            <div>
+                프로필사진
+            </div>
+
+            <div>
+                <span th:text="${member ?: 'DefaultUserName'} + 님">유저 이름</span>
+            </div>
+
+        </div>
+        <div class="review-stars">
+            <div class="w-100 text-center font-size-big">
+                <span>진료는 만족스러우셨나요?</span>
+            </div>
+            <!-- 별점 선택 box입니다. -->
+            <div class="d-flex justify-content-center align-items-center" style="align-items: center;">
+                <div style="justify-content: center;">
+                    <svg class="star bi-star-fill" fill="#ffb700" height="30" viewBox="0 0 16 16"
+                        width="30" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>
+                    <svg class="star bi-star-fill" fill="#ffb700" height="30" viewBox="0 0 16 16"
+                        width="30" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>
+                    <svg class="star bi-star-fill" fill="#ffb700" height="30" viewBox="0 0 16 16"
+                        width="30" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>
+                    <svg class="star bi-star-fill" fill="#ffb700" height="30" viewBox="0 0 16 16"
+                        width="30" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>
+                    <svg class="star bi-star-fill" fill="#ffb700" height="30" viewBox="0 0 16 16"
+                        width="30" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+        <!-- 리뷰 내용 입력 박스입니다. -->
+        <div class="w-100">
+            <form class="w-100 review-form" method="post" th:action="@{/review}">
+
+                <div class="mb-3">
+                    <label class="form-label" for="exampleFormControlTextarea1"></label>
+                    <textarea class="form-control" id="content" name="content"
+                        placeholder="병원의 후기를 입력해주세요!(10자~300자로 작성)" rows="3"></textarea>
+                </div>
+
+
+                <div class="mb-3 m-1 row justify-content-center w-100">
+                    <button class="btn btn-outline-secondary col-3 m-1" disabled id="submit-button" type="submit">리뷰
+                        등록</button>
+                </div>
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+    </div>
+
+
+
+    <script>
+
+        //placeId를 저장합니다.
+        let nowUrl = new URL(window.location.href);
+        let placeId = nowUrl.searchParams.get('placeId');
+
+        /**
+         * 
+         *  
+         */
+        const redirectPlaceDetailPage = () => {
+            let placeDetailUrl = window.location.origin + "/places/" + placeId;
+            window.location.href =  placeDetailUrl;
+        }
+
+
+
+
+
+        const filledStarPath = "M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"
+
+        let stars = document.querySelectorAll(".star");
+        let countStars = 0;
+
+        //별점을 클릭하지 않으면 제출 버튼을 비활성화 합니다.
+        const starClickCheck = () => {
+            const submitButton = document.querySelector('#submit-button')
+
+            if (countStars == 0) {
+                submitButton.setAttribute('disabled', true);
+                submitButton.classList.add('btn-outline-secondary')
+                submitButton.classList.remove('')
+            }
+            else {
+                submitButton.removeAttribute('disabled');
+                submitButton.classList.add('btn-primary')
+                submitButton.classList.remove('btn-outline-secondary')
+            }
+        }
+
+
+        //유저가 클릭한 별의 위치까지 속이꽉찬 별로 바꿔주는 기능입니다.
+        stars.forEach(star => {
+            star.addEventListener('click', function () {
+                clickedIndex = Array.from(stars).indexOf(this);
+                countStars = clickedIndex + 1;
+                console.log("stars=" + countStars)
+
+                starClickCheck();//별점을 클릭하지 않으면 제출 버튼을 비활성화 합니다.
+
+
+                // 클릭 이벤트 발생시 모든 별을 속이빈 별로 초기화합니다.
+                for (let i = 0; i <= 4; i++) {
+                    stars[i].innerHTML = ` <path
+                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />`
+                }
+
+                // 클릭 이벤트가 발생한 별까지 속이찬 별로 변경합니다.
+                console.log('클릭감지' + clickedIndex);
+                for (let i = 0; i <= clickedIndex; i++) {
+                    // console.log(i);
+                    // console.log(stars[i].innerHTML)
+
+                    stars[i].innerHTML = `<path
+                                d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />`
+
+                }
+
+
+            })
+
+        });
+
+
+
+        document.querySelector('.review-form').addEventListener('submit', function (event) {
+
+            console.log('클릭감지');
+            event.preventDefault();//submit 되는것을 막습니다.
+
+            const formData = new FormData(event.target);
+            console.log('reviewContent=' + formData.get('content'));//유저가 작성한 내용을 출력합니다(테스트용도)
+
+            if (formData.get('content').length <= 10 || formData.get('content').length > 300) {
+                alert('리뷰 내용은 10자 이상 300자 이하로 작성해주세요!');
+            } else if (countStars === 0) {
+                alert('별점을 클릭해 주세요!');
+            } else {
+
+                //formData 안에 있는 값들을 key value 형태로 출력합니다(테스트용)
+                // let entries = formData.entries();
+                // for (const pair of entries) {
+                //     console.log(pair[0] + ', ' + pair[1]);
+                // }
+
+                //서버로 보낼 객체입니다. 값 추가시 서버와 필드명을 동일하게 바꿔주세요.
+                const postData = {};
+
+
+
+
+                postData['placeId'] = placeId;
+                //유저가 선택한 별점을 저장합니다.
+                postData['reviewRating'] = countStars;
+                //유저가 작성한 리뷰 내용을 저장합니다.
+                postData['reviewContent'] = formData.get('content');
+
+                //서버로 데이터를 보낼 fetch함수입니다.
+                fetch('http://localhost:8080/review', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                })
+                    .then(response => {
+                        /** 
+                         * response가 정상적이지 않으면 서버에서 보낸 에러메시지를 담아 에러로 던집니다.
+                        * 던져진 Error는 아래 catch 에서 정의한대로 처리됩니다.
+                         * 
+                         * */
+                        if (!response.ok) {
+                            return response.text().then(errorMessage => {
+                                throw new Error(errorMessage)
+                            })
+                        }
+                        // 서버 응답을 JSON 형식으로 파싱
+                        // return response.json();//.json, .text, .formData 등도 사용 가능
+                        return response.text();//.json, .text, .formData 등도 사용 가능
+
+                    })
+                    .then(data => {
+                        // 서버 응답이 ok 일경우 처리
+                        if (data === "ok") {
+                            console.log('Server response:', data);
+
+                        } else {
+                            throw new Error('예상치 못한 응답 데이터:', data);
+
+                        }
+                    })
+                    .catch(error => {
+                        // 오류 처리
+                        console.error('데이터를 가져오는 중 오류가 발생했습니다:', error);
+                        alert(error.message);
+                    });
+            }
+        }
+        );
+
+
+
+
+
+
+
+
+    </script>
+
+
+
+
+</body>
+
+
+
+</html>
