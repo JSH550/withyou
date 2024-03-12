@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="../../static/css/main.css" rel="stylesheet">
+    <link href="../css/main.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" rel="stylesheet">
+    <script crossorigin="anonymous"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- submodules=geocoder로 서브모듈 geocoder 로드 -->
+    <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=jfjan06a18&submodules=geocoder" type="text/javascript"></script>
+</head>
+<body>
+    <div class="container d-flex">
+        <div class="col">
+            <div class="row justify-content-center pt-1 bg-white">
+                <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
+                <div class="col-3" onclick="goBackCurrentPage()">
+                    <!-- 화살표 이미지 -->
+                <svg class="bi bi-arrow-left" fill="currentColor" height="30" viewBox="0 0 16 16" width="30" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" fill-rule="evenodd"/>
+                </svg>
+                </div>
+                <div class="col-6 t-center">
+                    <span class="underline-text">시설 검색</span>
+                </div>
+                <div class="col-3">
+
+                </div>
+
+
+            </div>
+
+        <!-- ToDO -->
+        <!-- 뒤로가기 버튼 -->
+        <form class="d-flex col-12 mb-3" method="get" th:action="@{/search?}">
+            <div class="input-group">
+                
+                <input aria-label="Search" class="form-control" placeholder="검색어를 입력하세요!" th:name="query" type="search">
+                <button class="btn btn-outline-success" type="submit">
+                    <svg class="bi bi-search" fill="currentColor" height="16" viewBox="0 0 16 16" width="16" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                    <span class="visually-hidden">Search</span>
+                </button>
+            </div>
+        </form>
+        
+        <!-- 장소 정보를 보여줄 box 입니다. -->
+       <div class="justify-content-between w-100" id="place-information-box" th:attr="data-place-id=${placeDto.placeId}"
+       th:each="placeDto : ${placeDtoList}">
+            <div class="w-80" id="place-text-box" style="outline: auto;">
+                <div class="p-1 text-muted"><span class="small" th:text="${placeDto.categoryName}">시설 종류</span></div>
+                <div class="p-1"><span class="h6" th:text="${placeDto.placeName}">시설명</span></div>
+                <div class="p-1 text-muted"><span class="small" th:text="${placeDto.placeRoadAddress}">도로명</span></div>
+            </div>
+            <div id="place-img-box">
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+
+
+    </div>
+
+
+
+<script th:inline="javascript">
+    var goBackCurrentPage = ()=>{
+        console.log('클릭감지');
+        window.history.back()
+    }
+
+    var goPlaceDetailPage = () =>{
+       let placeInfoBoxAll = document.querySelectorAll("#place-information-box")
+       placeInfoBoxAll.forEach(placeInfoBox => {
+            placeInfoBox.addEventListener('click',function(){
+                const placeDetailUrl =  window.location.origin + "/places/";//쿼리파리미터 이전까지의 URL
+                let placeId =placeInfoBox.dataset.placeId;
+            
+                console.log(placeDetailUrl+placeId);
+                window.location.href = placeDetailUrl+placeId;
+            })
+        });
+    }
+
+    goPlaceDetailPage();
+
+// div 박스 클릭하면
+// 리다이렉트 해주세요
+// 리다이렉트는 /search?query=""로 해주세용
+
+
+
+</script>
+
+
+
+
+    
+</body>
+
+</html>
