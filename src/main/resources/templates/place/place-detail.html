@@ -30,13 +30,13 @@
     <!-- 시설 위치 -->
     <!-- map height:32 rem -->
     <!-- <div class="container row d-flex p-3 mt-5 justify-content-center" style="outline: auto;"> -->
-    <div class="container w-100  p-2  justify-content-center" style="outline: auto; background-color: gainsboro;">
+    <div class="container w-100  p-2  justify-content-center" style="background-color: gainsboro;">
 
         <div class="row">
-            <!-- 헤더 height 5rem 입니다. -->
-            <div class="row p-1 m-0 bg-white fixed-top h-4rem o-auto align-center">
+            <!-- 헤더 height 4rem 입니다. -->
+            <div class="row p-1 m-0 bg-white fixed-top h-4rem align-center">
                 <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
-                <div class="col-2" onclick="goBackCurrentPage()">
+                <div class="col-1" onclick="goBackCurrentPage()">
                     <!-- 화살표 이미지 -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor"
                         class="bi bi-arrow-left" viewBox="0 0 16 16">
@@ -44,8 +44,8 @@
                             d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8" />
                     </svg>
                 </div>
-                <div class="col-10 t-left">
-                    <span class="" style="font-size: 1.2rem;"  th:text="${placeDto.placeName}">시설명</span>
+                <div class="col-11 t-left ">
+                    <span class="p-1" style="font-size: 1.1rem;" th:text="${placeDto.placeName}">시설명</span>
                 </div>
 
 
@@ -55,7 +55,7 @@
 
 
 
-            <div id="place-detail-text" class="col-12 w-100 bg-white mt-4rem" style="outline: auto;">
+            <div class="col-12 w-100 bg-white mt-4rem" id="place-detail-text">
                 <div class="p-1 text-muted"><span th:text="${placeDto.categoryName}" class="small">시설 종류</span></div>
                 <div class="p-1"><span th:text="${placeDto.placeName}" class="h4">시설명</span></div>
                 <div class="p-1 text-muted"><span th:text="${placeDto.placeRoadAddress}" class="small">도로명</span></div>
@@ -63,11 +63,14 @@
 
 
 
-            <div id="list-example" class="row m-0 w-100 p-0 mt-1">
+            <div class="row m-0 w-100 p-0 mt-1 detail-tab">
                 <!-- font size 1.2rem입니다. -->
-                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">병원정보</a></div>
-                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">진료정보</a></div>
-                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab" href="#list-item-1">병원후기</a></div>             
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab"
+                        href="#list-item-1">병원정보</a></div>
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab"
+                        href="#list-item-1">진료정보</a></div>
+                <div class="col-4 bg-white"><a class="list-group-item list-group-item-action m-0 text-center detail-tab"
+                        href="#list-item-1">병원후기</a></div>
             </div>
 
 
@@ -75,12 +78,14 @@
             <!-- detail 세부내용은 1.25rem입니다. -->
             <div class="mb-1 mt-1 bg-white">
                 <div class="m-1"><span style="font-size: 0.9rem;">소개</span></div>
-                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span></div>
+                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span>
+                </div>
             </div>
 
             <div class="mb-1 mt-1 bg-white">
                 <div class="m-1"><span style="font-size: 0.8rem;">운영 시간</span></div>
-                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span></div>
+                <div class="m-1"><span class="" style="font-size: 1.0rem;">"병명" 전문 병원 "병원이름" 병원입니다. 주말진료가능합니다.</span>
+                </div>
             </div>
 
 
@@ -108,15 +113,102 @@
 
             </div>
 
-            <!-- 하당 고정 네비게이션 입니다. -->
-            <div class="fixed-bottom row bg-white bottom-button-box">
-                
-                <button type="button" class="btn btn-primary col-6">채팅 문의</button>
-                <button type="button" class="btn btn-success col-6">전화 문의</button>
+            <!-- 병원 후기 컨테이너 입니다.  -->
+
+            <div class="mb-1 mt-1 bg-white">
+                <!-- 후기 컨테이너 헤더입니다. -->
+                <div class="col-12 row align-items-center p-1" style="justify-content: center;">
+                    <div class="col-6">
+                        <svg class="bi bi-star-fill" fill="#ffb700" height="16" viewBox="0 0 16 16"
+                            width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                        </svg>
+                        <svg class="bi bi-star-fill" fill="#ffb700" height="16" viewBox="0 0 16 16"
+                            width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                        </svg>
+                        <svg class="bi bi-star-fill" fill="#ffb700" height="16" viewBox="0 0 16 16"
+                            width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                        </svg>
+
+                        <svg class="bi bi-star" fill="#ffb700" height="16" viewBox="0 0 16 16" width="16"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                        </svg>
+
+                        <svg class="bi bi-star-half" fill="#ffb700" height="16" viewBox="0 0 16 16"
+                            width="16" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M5.354 5.119 7.538.792A.52.52 0 0 1 8 .5c.183 0 .366.097.465.292l2.184 4.327 4.898.696A.54.54 0 0 1 16 6.32a.55.55 0 0 1-.17.445l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256a.5.5 0 0 1-.146.05c-.342.06-.668-.254-.6-.642l.83-4.73L.173 6.765a.55.55 0 0 1-.172-.403.6.6 0 0 1 .085-.302.51.51 0 0 1 .37-.245zM8 12.027a.5.5 0 0 1 .232.056l3.686 1.894-.694-3.957a.56.56 0 0 1 .162-.505l2.907-2.77-4.052-.576a.53.53 0 0 1-.393-.288L8.001 2.223 8 2.226z" />
+                        </svg>
+
+
+
+
+                    </div>
+
+                    <div class="col-6"><span>건의후기</span>
+                    </div>
+
+                    <div class="d-flex justify-content-center w-100">
+                        <button class="review-button btn btn-outline-secondary" onclick=goReviewPage() type="button ">후기 작성하기</button>
+                    </div>
+                </div>
+
 
             </div>
 
+
+
+            <!-- 후기 box 입니다.-->
+            <div class="bg-white mb-1" th:each="review : ${placeDto.reviews}">
+                <!-- 후기 box 헤더입니다. -->
+                <div class="h-4rem d-flex justify-content-between align-items-center" style="height: 1000px;">
+                    <!-- 유저정보입니다.  -->
+                    <div class="d-flex p-1">
+                        <div class="" style="margin-right: 0.8rem;">
+                            <svg class="bi bi-emoji-smile" fill="currentColor" height="30" viewBox="0 0 16 16"
+                                width="30" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                <path
+                                    d="M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                            </svg>
+                        </div>
+                        <div th:text="${review.memberName}">닉네임</div>
+                    </div>
+
+                    <div class="col-3">별점</div>
+                </div>
+
+                <!-- 후기 내용입니다. 서버에서 받아온 값을 출력합니다. -->
+                <!-- 후기는 text만 작성됩니다. -->
+                <div>
+                    <span th:text="${review.reviewContent}">후기정말좋아요또오고싶네요의자가푹신해요</span>
+                </div>
+
+            </div>
+
+
+
         </div>
+
+
+        <!-- 하당 고정 네비게이션 입니다. -->
+        <div class="fixed-bottom row bg-white bottom-button-box w-100 m-0 p-1 justify-content-center">
+            <!-- ToDo 채팅 기능 구현 -->
+
+            <button class="btn btn-primary col-5 m-1" type="button">채팅 문의</button>
+            <!-- ToDo 전화 기능 구현 -->
+            <button class="btn btn-success col-5 m-1" type="button">전화 문의</button>
+
+        </div>
+
+    </div>
     </div>
 
     <!-- <script th:inline="javascript">
@@ -148,7 +240,54 @@ createMarker(37.3595704, 127.125399,map)
 createMarker(placeLatitude,placeLongitude,map) -->
 
 
+
+
+
+
+    <script>
+        /**
+         * 뒤로가기 기능입니다.
+         * 
+         */
+
+        var goBackCurrentPage = () => {
+            console.log('클릭감지');
+            window.history.back()
+        }
+
+
+        var goReviewPage = () => {
+
+
+
+            const curretntUrl = window.location.href;
+
+            // /로 분할하여 배열을 생성합니다.
+            let urlParts = curretntUrl.split('/');
+
+            //Test용 코드입니다.
+            // urlParts.forEach(urlPart => {
+            //     console.log(urlPart);
+
+            // });
+
+
+            //마지막 부분을 추출합니다.(placeId)
+            let placeId = urlParts[urlParts.length - 1];
+
+            console.log(placeId);
+
+            let reveiwPageUrl = window.location.origin + '/review?placeId=' + placeId
+
+            console.log("리뷰페이지" + reveiwPageUrl);
+            window.location.href = reveiwPageUrl;
+
+        }
+
+
+
     </script>
+
 
 </body>
 
