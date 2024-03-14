@@ -1,11 +1,13 @@
 package com.js.withyou.data.entity;
 
-import com.js.withyou.data.entity.Place.Review;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
@@ -24,8 +26,8 @@ public class Member {
     private String memberName;
     
     //회원이 작성한 리뷰
-    @OneToMany
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,fetch = LAZY)
+    private List<Review> reviews = new ArrayList<>();
     
     //meber 저장 메서드
     public void saveMember(String memberEmail,String memberName,String memberPassword){
