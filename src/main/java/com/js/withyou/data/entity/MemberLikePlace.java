@@ -10,7 +10,7 @@ import lombok.*;
 //@RequiredArgsConstructor
 @AllArgsConstructor
 @Entity
-public class UserFavoritePlace {
+public class MemberLikePlace {
 
 
     @Id
@@ -26,7 +26,7 @@ public class UserFavoritePlace {
     private Place place;
 
 
-    public UserFavoritePlace(Member member, Place place) {
+    public MemberLikePlace(Member member, Place place) {
         this.member = member;
         this.place = place;
     }
