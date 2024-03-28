@@ -1,8 +1,7 @@
 package com.js.withyou.data.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +10,9 @@ import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
 @Getter
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)//auto_increment 자동생성
@@ -28,6 +29,11 @@ public class Member {
     //회원이 작성한 리뷰
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,fetch = LAZY)
     private List<Review> reviews = new ArrayList<>();
+
+    //좋아요 누른 시설
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL,fetch = LAZY)
+    private List<MemberLikePlace> memberLikePlace = new ArrayList<>();
+
     
     //meber 저장 메서드
     public void saveMember(String memberEmail,String memberName,String memberPassword){
