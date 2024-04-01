@@ -10,6 +10,7 @@ import com.js.withyou.service.MemberService;
 import com.js.withyou.service.PostService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,24 +53,29 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    @Override
-    public List<PostListDto> getPostList(Integer pageNumber) {
-        return null;
-    }
-
+    /**
+     * 페이지네이션으로 postList를 반환하는 메서드 입니다.
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @return PostListDto
+     */
     @Transactional(readOnly = true)
     @Override
-    public List<PostListDto> getPostList(int pageNumber, int pageSize) {
+    public Page<PostListDto> getPostList(int pageNumber, int pageSize) {
+        // pageNumber는 0부터 시작하므로 1을 빼줍니다.
+        pageNumber -= 1;
+
         PageRequest pageRequest = PageRequest.of(pageNumber,pageSize);
         /**
          * 전달받은 page 정보로 Post를 조회해서 반환합니다.
          * 반환된 객체는 Page 타입임으로 안에 데이터를 꺼내야 합니다.
          */
         Page<Post> allPosts = postRepository.findAll(pageRequest);
-        //return용 객체입니다.
+        //PostListDto 저장용 객체입니다.
         List<PostListDto> postListDtos = new ArrayList<>();
         //repository에서 반환된 값을 PlstListDTo로 변경하여 반환합니다.
-       return postListDtos = allPosts.getContent()
+       postListDtos = allPosts.getContent()
                 .stream()
                 .map(Post -> {
                     return PostListDto.builder()
@@ -78,6 +84,10 @@ public class PostServiceImpl implements PostService {
                             .memberName(Post.getMember().getMemberName())
                             .build();
                 }).collect(Collectors.toList());
+        // Page 객체로 결과를 래핑하여 반환합니다.
+        // 파라미터는, 전달할객체,pageRequest 객체, total elements 순입니다.
+        PageImpl<PostListDto> postListDtos1 = new PageImpl<>(postListDtos, pageRequest, allPosts.getTotalElements());
+        return postListDtos1;
     }
 
     @Override
