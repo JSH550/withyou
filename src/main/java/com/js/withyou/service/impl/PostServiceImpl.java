@@ -15,8 +15,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,6 +95,22 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostViewDto getPostById(Long postId) {
-        return null;
+        Optional<Post> result = postRepository.findById(postId);
+        if (result.isEmpty()){
+            throw new NoSuchElementException("post 검색 결과가 없습니다.");
+        }
+        //작성 시간 포맷을 설정합니다. 연 월 일 시간 분 으로 나타냅니다.
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+
+        Post post = result.get();
+//        String format = post.getPostCreateDate().format(dateTimeFormatter);
+        return PostViewDto.builder()
+                .postTitle(post.getPostTitle())
+                .postContent(post.getPostContent())
+                .postId(post.getPostId())
+                .postCreateDate(post.getPostCreateDate().format(dateTimeFormatter))
+                .memberName(post.getMember().getMemberName())
+                .build();
     }
 }
