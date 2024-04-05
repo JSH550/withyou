@@ -1,14 +1,16 @@
 package com.js.withyou.controller;
 
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import com.js.withyou.customClass.CustomUser;
+import com.js.withyou.data.KeywordDto;
 import com.js.withyou.data.dto.CategoryDto;
+import com.js.withyou.data.dto.Region.RegionNameDto;
+import com.js.withyou.data.dto.SubRegion.SubRegionSearchDto;
 import com.js.withyou.data.dto.place.PlaceDetailDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.dto.Region.RegionDto;
-import com.js.withyou.service.CategoryService;
-import com.js.withyou.service.PlaceService;
-import com.js.withyou.service.RegionService;
-import com.js.withyou.service.MemberLikePlaceService;
+import com.js.withyou.data.dto.SearchSuggestionDto;
+import com.js.withyou.service.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -28,12 +31,14 @@ public class PlaceController {
     private final PlaceService placeService;
     private final RegionService regionService;
 
+    private final SubRegionService subRegionService;
     private final MemberLikePlaceService memberLikePlaceService;
 
-    public PlaceController(CategoryService categoryService, PlaceService placeService, RegionService regionService, MemberLikePlaceService memberLikePlaceService) {
+    public PlaceController(CategoryService categoryService, PlaceService placeService, RegionService regionService, SubRegionService subRegionService, MemberLikePlaceService memberLikePlaceService) {
         this.categoryService = categoryService;
         this.placeService = placeService;
         this.regionService = regionService;
+        this.subRegionService = subRegionService;
         this.memberLikePlaceService = memberLikePlaceService;
     }
 
@@ -110,6 +115,86 @@ public class PlaceController {
         model.addAttribute("placeDtoList", placeDtoList);
         return "/place/place-search";
     }
+
+
+    @ResponseBody
+    @PostMapping("/search")
+    public ResponseEntity<List<PlaceDto>> returnSearchResult(@RequestBody SearchSuggestionDto searchSuggestionDto,
+                                                             Model model) {
+
+        log.info("search 요청 값={}",searchSuggestionDto.toString());
+        if (searchSuggestionDto==null) {
+            List<PlaceDto> placeDtoList = new ArrayList<>();
+
+            return ResponseEntity.ok(placeDtoList);
+        }
+
+
+        //타입하고 id 받아오기
+        //1. region으로 place 검색하기
+        //2. subregion으로 place 검색하기.
+
+
+        List<PlaceDto> placeDtoList = placeService.searchPlacesByKeyWord(searchSuggestionDto.getName());
+        for (PlaceDto placeDto : placeDtoList) {
+            log.info("검색된값 = {}",placeDto.toString());
+
+        }
+        return ResponseEntity.ok(placeDtoList);
+
+    }
+
+
+    /**
+     * 유저가 검색창에 입력한 값으로 추천 검색 수행
+     * 1. 시군구에서 정보 검색 있으면 return 없으면 읍면동으로 검색 진행
+     * - 읍면동으로 검색 결과 있으면 return 없으면 return x
+     * 2. 시설명에서 검색
+     * - 검색 결과 있으면 return 없으면 return x 페이지네이션 필요
+     */
+    @ResponseBody
+    @PostMapping("/search/suggest")
+    public ResponseEntity<List<SearchSuggestionDto>> showSearchSuggest(@RequestBody KeywordDto keyword,
+                                                                       Model model) {
+        //1. 지역(region) 이름으로 검색
+        List<SearchSuggestionDto> searchSuggestionDtoList = new ArrayList<>();//클라이언트에게 전달하기 위한 DTO List 입니다.
+
+        log.info("유저가 요청한 키워드 ={}", keyword.getKeyword());
+        List<RegionNameDto> regionNameDtoByKeyword = regionService.getRegionNameDtoByKeyword(keyword.getKeyword());
+        if (!regionNameDtoByKeyword.isEmpty()) {
+            for (RegionNameDto regionNameDto : regionNameDtoByKeyword) {
+//                SearchSuggestionDto.builder().dataType("region").name(regionNameDto.getRegionName()).build();
+                searchSuggestionDtoList.add(
+                        SearchSuggestionDto.builder()
+                                .id(regionNameDto.getRegionId())
+                                .dataType("region")
+                                .name(regionNameDto.getRegionName())
+                                .build()
+                );
+            }
+        }
+
+        //table
+        //name
+        //id
+
+        //2. 세부지역(subregion) 이름으로 검색
+        List<SubRegionSearchDto> subRegionSearchDtosByKeyword = subRegionService.getSubRegionSearchDtosByKeyword(keyword.getKeyword());
+        if (!subRegionSearchDtosByKeyword.isEmpty()) {
+            for (SubRegionSearchDto subRegionSearchDto : subRegionSearchDtosByKeyword) {
+                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
+                        .id(subRegionSearchDto.getSubRegionId())
+                        .dataType("subRegion")
+                        .name(subRegionSearchDto.getSubRegionNameLong())
+                        .build());
+            }
+        }
+
+        return ResponseEntity.ok(searchSuggestionDtoList);
+
+//        return "ok";
+    }
+
 
     //1.시도 정보로 검색 -> 풀네임, 줄임말 둘다임
 //        placeService.
@@ -223,6 +308,8 @@ public class PlaceController {
             return new ResponseEntity<>("요청 오류", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 }
 
 
