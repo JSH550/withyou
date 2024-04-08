@@ -7,6 +7,7 @@ import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceCreateDto;
 import com.js.withyou.data.dto.place.PlaceDetailDto;
 import com.js.withyou.data.dto.place.PlaceDto;
+import com.js.withyou.data.dto.place.PlaceListDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
 import com.js.withyou.data.entity.SubRegion;
@@ -45,7 +46,7 @@ public class PlaceServiceImpl implements PlaceService {
     private final PlaceRepository placeRepository;
 
     private final CategoryService categoryService;
-    
+
 
     private final CategoryRepository categoryRepository;
     // 수정된 부분: 인스턴스 변수로 변경하여 @Value 어노테이션이 제대로 동작하도록 함
@@ -201,7 +202,7 @@ public class PlaceServiceImpl implements PlaceService {
      * @param subRegionIdList 시군구의 ID 목록
      * @return 해당 시군구의 장소 목록을 PlaceDto의 List 형태로 반환합니다.
      */
-    public List<PlaceDto> getPlaceBySubRegionId(List<Long> subRegionIdList) {
+    public List<PlaceDto> getPlaceBySubRegionIdList(List<Long> subRegionIdList) {
         List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
         for (Long subRegionId : subRegionIdList) {
             List<Place> foundPlaceList = placeRepository.findBySubregionId(subRegionId);//시군구 Id로 Place 검색
@@ -210,6 +211,40 @@ public class PlaceServiceImpl implements PlaceService {
             }
         }
         return foundPlaceDtoList;
+    }
+
+    @Override
+    public List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId) {
+
+        List<Place> placeList = placeRepository.findBySubregionId(subRegionId);
+        List<PlaceListDto> placeListDtoList = placeList.stream()
+                .map(Place -> PlaceListDto.builder()
+                        .placeId(Place.getPlaceId())
+                        .placeName(Place.getPlaceName())
+                        .placeRoadAddress(Place.getPlaceRoadAddress())
+                        .categoryName(Place.getCategory().getCategoryName())
+                        .subRegionName(Place.getSubRegion().getSubRegionName())
+                        .build()).collect(Collectors.toList());
+
+        return placeListDtoList;
+
+
+    }
+
+    @Override
+    public List<PlaceListDto> getPlacesByRegionId(Long regionId) {
+        List<Place> placeList = placeRepository.findPlacesByRegionId(regionId);
+
+        List<PlaceListDto> placeListDtoList = placeList.stream()
+                .map(Place -> PlaceListDto.builder()
+                        .placeId(Place.getPlaceId())
+                        .placeName(Place.getPlaceName())
+                        .placeRoadAddress(Place.getPlaceRoadAddress())
+                        .categoryName(Place.getCategory().getCategoryName())
+                        .subRegionName(Place.getSubRegion().getSubRegionName())
+                        .build()).collect(Collectors.toList());
+
+        return placeListDtoList;
     }
 
     /**
@@ -245,6 +280,7 @@ public class PlaceServiceImpl implements PlaceService {
      * 1.키워드로 카테고리 검색 후 반환값이 null 이 아니면, 해당 카테고리 ID와 매핑된 시설을 저장합니다.
      * 2.키워드로 시설명 검색 후 반환값이 null 이 아니면, 해당 시설들을 저장합니다.
      * 3.키워드로 시도 정보 검색 후 반환값이 null 이 아니면, 해당 시도 하위 시군구 정보로 매핑된 시설을 저장합니다.
+     *
      * @param searchKeyword 검색에 사용될 키워드 입니다.
      * @return List<PlaceDto> 저장된 시군구(Place)정보를 PlaceDto List로 반환합니다.
      */
@@ -274,9 +310,12 @@ public class PlaceServiceImpl implements PlaceService {
 
     }
 
+
+
     /**
      * 유저가 좋아요를 누른 시설(place)들을 DTO List로 반환하는 메서드 입니다.
-//     * @param memberEmail LikePlaceEntity 에서 유저(member)가 좋아요를 누른 place 정보들을 가져옵니다.
+     * //     * @param memberEmail LikePlaceEntity 에서 유저(member)가 좋아요를 누른 place 정보들을 가져옵니다.
+     *
      * @return List<PlaceDto> PlaceDto형태로 반환합니다(검색창에서 검색했을때와 동일하게 view로 전송하기 위함입니다.)
      */
 //    @Transactional
@@ -291,7 +330,6 @@ public class PlaceServiceImpl implements PlaceService {
 //        return placeDtos;
 ////        return null;
 //    }
-
     public PlaceDto convertPlaceDto(Place place) {
         PlaceDto placeDto = new PlaceDto();
         placeDto.convertToPlaceDto(place);

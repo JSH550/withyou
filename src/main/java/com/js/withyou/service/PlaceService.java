@@ -4,10 +4,10 @@ import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceCreateDto;
 import com.js.withyou.data.dto.place.PlaceDetailDto;
 import com.js.withyou.data.dto.place.PlaceDto;
+import com.js.withyou.data.dto.place.PlaceListDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
 import com.js.withyou.data.entity.SubRegion;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -41,9 +41,15 @@ public interface PlaceService {
 
 
     //    List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList);
-    List<PlaceDto> getPlaceBySubRegionId(List<Long> subRegionIdList);
+    List<PlaceDto> getPlaceBySubRegionIdList(List<Long> subRegionIdList);
 
 
+    /**
+     * 특정 subRegion와 관계가 있는 place를 검색하여 반환합니다.
+     * @param subRegionId
+     * @return PlaceListDto List 형식으로 반환합니다.
+     */
+    List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId);
     List<PlaceDto> getPlaceBySubRegions(List<SubRegionDto> subRegionDtoList);
 
     List<PlaceDto> getPlaceByRegionName(String keyword);
@@ -57,5 +63,12 @@ public interface PlaceService {
      * @return List<PlaceDto> 저장된 시군구(Place)정보를 PlaceDto List로 반환합니다.
      */
     List<PlaceDto> searchPlacesByKeyWord(String searchKeyword);
+
+    /**
+     *
+     * @param regionId
+     * @return
+     */
+    List<PlaceListDto> getPlacesByRegionId(Long regionId);
 
 }
