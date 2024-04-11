@@ -4,11 +4,15 @@
 ## 
 ### Front End
 - JavaScript
+- Bootstrap
+- Naver 지도 API
 
 ### Back End
 - Spring Boot
 - Spring Data JPA
-- 
+- Spring Security
+### DB
+- MySQL
 
 # 기능 구현
 ## 회원가입 기능
