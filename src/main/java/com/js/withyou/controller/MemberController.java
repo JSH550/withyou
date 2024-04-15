@@ -1,23 +1,24 @@
 package com.js.withyou.controller;
 
 import com.js.withyou.customClass.CustomUser;
-import com.js.withyou.data.dto.MemberCreateDto;
-import com.js.withyou.data.dto.MemberDto;
-import com.js.withyou.data.dto.MemberNameDto;
+import com.js.withyou.data.dto.member.MemberCreateDto;
+import com.js.withyou.data.dto.member.MemberDto;
+import com.js.withyou.data.dto.member.MemberNameDto;
+import com.js.withyou.data.dto.member.MemberPasswordDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.dto.review.ReviewMypageDto;
 import com.js.withyou.service.MemberLikePlaceService;
 import com.js.withyou.service.MemberService;
 import com.js.withyou.service.PlaceService;
 import com.js.withyou.service.ReviewService;
-import com.js.withyou.service.impl.UserDetailsServiceImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Optional;
 
@@ -203,6 +205,107 @@ public class MemberController {
         return "/member/member-reviews";
     }
 
+
+
+
+    /**
+     * 유저의 닉네임을 바꾸는 API입니다.
+     * @param memberNameDto email과 닉네임을 담는 DTO 입니다.
+     * @param authentication spring security 인증정보입니다.
+     * @return ResponseEntity
+     */
+    @ResponseBody
+    @PatchMapping("/members/name")
+    public ResponseEntity changeMemberNickname(@RequestBody MemberNameDto memberNameDto,
+                                       Authentication authentication){
+
+
+//        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+//        customUser.memberName= "테스트닉네임";
+//
+//        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser, authentication.getCredentials(), authentication.getAuthorities());
+//        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+
+        log.info("요청자={}",authentication.toString());
+        log.info("인증여부={}",authentication.isAuthenticated());
+
+        if (!authentication.isAuthenticated()) {
+            return ResponseEntity.badRequest().body("로그인 정보가 없습니다.");
+
+        }
+
+            //인증 정보를 파싱합니다.
+            CustomUser customUser = (CustomUser) authentication.getPrincipal();
+            //로그인 인증 유저와 닉네임 변경 유저가 동일한지 확인
+            if (memberNameDto.getMemberEmail().equals(customUser.getUsername())){
+                log.info("닉네임 변경 요청 유저 = {}",memberNameDto.getMemberEmail());
+                boolean result = memberService.updateMemberName(memberNameDto);
+                log.info("닉네임 변경 요청 결과={}",result);
+                customUser.memberName = memberNameDto.getMemberName();
+            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser
+                   ,authentication.getCredentials()
+                   ,authentication.getAuthorities());
+
+                SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+
+                return ResponseEntity.ok().body(result);
+            }else{
+                return ResponseEntity.badRequest().body("계정 정보가 없습니다.");
+
+            }
+
+
+
+        //닉넴 변경 요청 받아서
+        //로그인한 유저랑 동일한지 확인하고
+        //맞으면 비즈니스로직 불러서 해결좀
+
+    }
+
+
+    @ResponseBody
+    @PatchMapping("/members/password")
+    public ResponseEntity changeMemberPassword(Authentication authentication,
+                                               MemberPasswordDto memberPasswordDto){
+
+
+        log.info("요청자={}",authentication.toString());
+        log.info("인증여부={}",authentication.isAuthenticated());
+        if (!authentication.isAuthenticated()) {
+            return ResponseEntity.badRequest().body("로그인 정보가 없습니다.");
+        }
+
+        //인증 정보를 파싱합니다.
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        //로그인 인증 유저와 닉네임 변경 유저가 동일한지 확인
+        if (memberPasswordDto.getMemberEmail().equals(customUser.getUsername())){
+
+            log.info("닉네임 변경 요청 유저 = {}",memberPasswordDto.getMemberEmail());
+            boolean result = memberService.updateMemberPassword(memberPasswordDto);
+            log.info("닉네임 변경 요청 결과={}",result);
+
+//            customUser.memberName = memberPasswordDto.getMemberName();
+            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser
+                    ,authentication.getCredentials()
+                    ,authentication.getAuthorities());
+
+            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+
+            return ResponseEntity.ok().body(result);
+        }else{
+            return ResponseEntity.badRequest().body("계정 정보가 없습니다.");
+
+        }
+
+
+
+
+
+
+
+    }
+
+
     @ResponseBody
     @GetMapping("/test52")
     public String test52(Authentication authentication){
@@ -213,6 +316,45 @@ public class MemberController {
 //        log.info("유저정보={}",principal.toString());
         return "ok";
 
+    }
+
+
+    //spring securtiy session 변경 테스트입니다.
+    @ResponseBody
+    @GetMapping("/testU")
+    public String sessionUpdateTest(Authentication authentication){
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        customUser.memberName= "테스트닉네임";
+        
+        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser, authentication.getCredentials(), authentication.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+        return "ok";
+
+
+    }
+
+    @ResponseBody
+    @GetMapping("/testO")
+    public String sessionOutputTest(Authentication authentication,
+                               HttpServletRequest request ){
+
+        Enumeration<String> attributeNames = request.getSession().getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String attributeName = attributeNames.nextElement();
+            Object attributeValue = request.getSession().getAttribute(attributeName);
+            log.info("Attribute Name: " + attributeName + ", Value: " + attributeValue);
+        }
+       
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        log.info("Authentication Details:");
+        log.info("Principal: {}", authentication.getPrincipal());
+        log.info("Authorities: {}", authentication.getAuthorities());
+        log.info("Credentials: {}", authentication.getCredentials());
+        log.info("Is Authenticated: {}", authentication.isAuthenticated());
+        log.info("Name: {}", authentication.getName());
+        log.info("Details",authentication.getDetails());
+
+        return "ok";
     }
 
     ;
