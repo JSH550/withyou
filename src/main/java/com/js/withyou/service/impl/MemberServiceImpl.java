@@ -1,5 +1,6 @@
 package com.js.withyou.service.impl;
 
+import com.js.withyou.customClass.CustomUser;
 import com.js.withyou.data.dto.member.MemberCreateDto;
 import com.js.withyou.data.dto.member.MemberDto;
 import com.js.withyou.data.dto.member.MemberNameDto;
@@ -7,16 +8,18 @@ import com.js.withyou.data.dto.member.MemberPasswordDto;
 import com.js.withyou.data.entity.Member;
 import com.js.withyou.repository.MemberRepository;
 import com.js.withyou.service.MemberService;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -129,48 +132,94 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     @Override
     public boolean updateMemberPassword(MemberPasswordDto memberPasswordDto) {
-        boolean saveResult = false;//결과를 반환할 불리안 객체입니다. default값은 false입니다.
+        Optional<Member> foundMember = memberRepository.findByMemberEmail(memberPasswordDto.getMemberEmail());
+        String newPassword = memberPasswordDto.getNewPassword();
 
-            Optional<Member> foundMember = memberRepository.findByMemberEmail(memberPasswordDto.getMemberEmail());
-            if (foundMember.isEmpty()) {
-                log.info("패스워드 변경 요청 에러, 저장되지 않은 사용자");
-                throw new EntityNotFoundException("로그인 정보를 확인해 주세요");
-//            return saveResult = false;
-            }
+        //유저가 입력한  현재 비밀번호가 맞는지 확인합니다.
+        boolean passwordMatch = confirmPasswordMatch(memberPasswordDto.getMemberEmail(), memberPasswordDto.getOldPassword());
+        if (!passwordMatch) {
+            log.error("패스워드 변경 요청 에러, 입력한 현재 비밀번호가 올바르지 않습니다.");
+            throw new IllegalArgumentException("현재 비밀번호가 올바르지 않습니다.");
+        }
 
-            String encodedNewPassword = passwordEncoder.encode(memberPasswordDto.getMemberPassword());//새로운 비밀번호를 인코딩합니다.
-            //새로운 비밀번호가 DB에 저장된 비밀번호와 같은지 확인합니다, 인코딩 되어있으므로 passwordEncoder.matches 메서드를 이용합니다.
-            if (passwordEncoder.matches(memberPasswordDto.getMemberPassword(), foundMember.get().getMemberPassword())) {
-                log.info("패스워드 변경 요청 에러, 기존 패스워드와 동일한 패스워드");
-                throw new DataIntegrityViolationException("패스워드 변경 요청 에러,기존과 동일한 패스워드 입니다. ");
-//            return saveResult = false;
-            }
-            ;
-//
-//        if (encodedNewPassword.equals(foundMember.get().getMemberPassword())) {
-//            log.info("패스워드 변경 요청 에러, 기존 패스워드와 동일한 패스워드");
-//            return saveResult = false;
-//        }
+        Member requestMember = foundMember.get();//Optional 을 제거합니다.
 
-            Member member = foundMember.get();//DB에서 찾아온 레코드 값을 객체에 저장합니다.
-            member.updateMemberPassword(encodedNewPassword);//비밀번호를 새로운 비밀번호로 설정합니다.
-            Member updatedMember = memberRepository.save(member);
+        //새로운 비밀번호가 DB에 저장된 비밀번호와 같은지 확인합니다, 인코딩 되어있으므로 passwordEncoder.matches 메서드를 이용합니다.
+        if (passwordEncoder.matches(memberPasswordDto.getNewPassword(), requestMember.getMemberPassword())) {
+            log.error("패스워드 변경 요청 에러, 기존 패스워드와 동일한 패스워드");
+            throw new IllegalArgumentException("기존 패스워드와 동일한 패스워드입니다.");
+        }
 
-            //요청한 유저와 패스워드를 변경한 유저가 동일한지 확인합니다.
-            if (member.getMemberId() != updatedMember.getMemberId()) {
-                log.info("패스워드 변경 요청 에러, DB 저장 에러");
+        //새로운 비밀번호가 조건에 부합하는지 확인합니다.
+        boolean validateResult = validatePassword(newPassword);
 
-                throw new DataIntegrityViolationException("패스워드 변경 요청 에러. 관리자에게 문의하세요 ");
+        log.info("비밀번호 검증결과 = {}",String.valueOf(validateResult));
+        if (!validateResult){
+            log.error("패스워드 변경 요청 에러, 기존 패스워드와 동일한 패스워드");
+            throw new IllegalArgumentException("비밀번호는 8~16자의 적어도 하나의 영어 소문자, 대문자, 숫자, 특수문자가 포함되어야 합니다.  ");
+        }
 
-//                saveResult = true;
-            }
+        String encodedNewPassword = passwordEncoder.encode(memberPasswordDto.getNewPassword());//새로운 비밀번호를 인코딩합니다.
+        requestMember.updateMemberPassword(encodedNewPassword);//비밀번호를 새로운 비밀번호로 설정합니다.
+        Member updatedMember = memberRepository.save(requestMember);
 
-            return saveResult = true;
+        // 업데이트된 멤버가 null이 아닌지 확인하여 저장이 제대로 이루어졌는지 확인합니다.
+        if (updatedMember == null) {
+            log.error("패스워드 변경 요청 에러, DB 저장 에러");
+            throw new DataIntegrityViolationException("패스워드 변경 요청 에러. 관리자에게 문의하세요 ");
+        }
+        return true;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public boolean confirmPasswordMatch(String memberEmail, String password) {
+        Optional<Member> byMemberEmail = memberRepository.findByMemberEmail(memberEmail);
+        if (byMemberEmail.isEmpty()) {
+            log.info("패스워드 확인 요청 에러 발생, 저장되지 않은 사용자");
+            return false; // 사용자가 존재하지 않는 경우 false 반환
+        }
+
+        Member member = byMemberEmail.get();
+
+        if (passwordEncoder.matches(password,member.getMemberPassword())) {
+            return true;
+        } else {
+            log.info("패스워드 확인 요청 에러 발생, 입력한 비밀번호가 맞지 않음");
+            return false;
+        }
+    }
 
 
+    /**
+     * 유저 인증정보를 검증하는 메서드입니다.
+     * @param authentication API를 호출한 유저의 인증 정보를 받습니다.
+     * @param memberEmail 클라이언트에서 API를 호출한 유저 Email을 받습니다.
+     * @return boolean 인증 결과를 반환합니다.
+     */
+    @Override
+    public boolean validateUserAuthentication(Authentication authentication, String memberEmail) {
+        if (authentication==null) {
+            throw  new BadCredentialsException("사용자 인증정보 에러, 사용자 인증 정보 없음");
+        } else if (!authentication.isAuthenticated()) {
+            throw  new BadCredentialsException("사용자 인증정보 에러, 사용자 인증 정보 없음");
+        }
+        //인증 정보를 파싱합니다. 현재 프로젝트에서는 CustomUser class를 만들어 사용중입니다.
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        log.info("파싱한정보={}",customUser);
+        //로그인 인증 유저와 닉네임 변경 유저가 동일한지 검증
+        if (!memberEmail.equals(customUser.getUsername())){
+            throw  new BadCredentialsException("로그인 정보가 올바르지 않습니다.");
+        }
+        return true;
     }
 
     ;
+
+    public boolean validatePassword(String password) {
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$#!%*?&]{8,16}$";
+        return Pattern.matches(regex, password);
+    }
 
 
     private MemberDto convertToDto(Member member) {
