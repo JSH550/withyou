@@ -174,8 +174,6 @@ public class MemberController {
     }
 
 
-
-
     /**
      * 유저가 본인이 좋아요 누른 시설을 보여주는 메서드 입니다.
      *
@@ -206,54 +204,45 @@ public class MemberController {
     }
 
 
-
-
     /**
      * 유저의 닉네임을 바꾸는 API입니다.
-     * @param memberNameDto email과 닉네임을 담는 DTO 입니다.
+     *
+     * @param memberNameDto  email과 닉네임을 담는 DTO 입니다.
      * @param authentication spring security 인증정보입니다.
      * @return ResponseEntity
      */
     @ResponseBody
     @PatchMapping("/members/name")
     public ResponseEntity changeMemberNickname(@RequestBody MemberNameDto memberNameDto,
-                                       Authentication authentication){
+                                               Authentication authentication) {
 
-
-//        CustomUser customUser = (CustomUser) authentication.getPrincipal();
-//        customUser.memberName= "테스트닉네임";
-//
-//        Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser, authentication.getCredentials(), authentication.getAuthorities());
-//        SecurityContextHolder.getContext().setAuthentication(newAuthentication);
-
-        log.info("요청자={}",authentication.toString());
-        log.info("인증여부={}",authentication.isAuthenticated());
+        log.info("요청자={}", authentication.toString());
+        log.info("인증여부={}", authentication.isAuthenticated());
 
         if (!authentication.isAuthenticated()) {
             return ResponseEntity.badRequest().body("로그인 정보가 없습니다.");
+        }
+        //인증 정보를 파싱합니다.
+        CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        //로그인 인증 유저와 닉네임 변경 유저가 동일한지 확인
+        if (memberNameDto.getMemberEmail().equals(customUser.getUsername())) {
+            log.info("닉네임 변경 요청 유저 = {}", memberNameDto.getMemberEmail());
+            boolean result = memberService.updateMemberName(memberNameDto);
+            log.info("닉네임 변경 요청 결과={}", result);
+            customUser.memberName = memberNameDto.getMemberName();
+
+            // 새로운 Authentication 객체 생성합니다. 토큰은 UsernamePasswordAuthenticationToken
+            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser
+                    , authentication.getCredentials() // 현재 인증에 사용된 자격 증명 저장
+                    , customUser.getAuthorities());// 현재 사용자의 권한 목록을 저장
+            // SecurityContextHolder에서 현재 인증 정보를 설정합니다.
+            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
+
+            return ResponseEntity.ok().body(result);
+        } else {
+            return ResponseEntity.badRequest().body("계정 정보가 없습니다.");
 
         }
-
-            //인증 정보를 파싱합니다.
-            CustomUser customUser = (CustomUser) authentication.getPrincipal();
-            //로그인 인증 유저와 닉네임 변경 유저가 동일한지 확인
-            if (memberNameDto.getMemberEmail().equals(customUser.getUsername())){
-                log.info("닉네임 변경 요청 유저 = {}",memberNameDto.getMemberEmail());
-                boolean result = memberService.updateMemberName(memberNameDto);
-                log.info("닉네임 변경 요청 결과={}",result);
-                customUser.memberName = memberNameDto.getMemberName();
-            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser
-                   ,authentication.getCredentials()
-                   ,authentication.getAuthorities());
-
-                SecurityContextHolder.getContext().setAuthentication(newAuthentication);
-
-                return ResponseEntity.ok().body(result);
-            }else{
-                return ResponseEntity.badRequest().body("계정 정보가 없습니다.");
-
-            }
-
 
 
         //닉넴 변경 요청 받아서
@@ -262,70 +251,81 @@ public class MemberController {
 
     }
 
+    /**
+     * 비밀번호 변경 페이지를 보여주는 API 입니다.
+     *
+     * @return
+     */
+
+    @GetMapping("/members/password")
+    public String showChangePasswordForm() {
+        return "/member/member-password-change";
+    }
+
+    /**
+     * 비밀번호를 변경하는 API 입니다.
+     *
+     * @param authentication    사용자 인증 정보를 확인하니다.
+     * @param memberPasswordDto 유저의 email과 변경할 password를 전달받습니다.
+     * @return
+     */
+
+
+
+
 
     @ResponseBody
     @PatchMapping("/members/password")
     public ResponseEntity changeMemberPassword(Authentication authentication,
-                                               MemberPasswordDto memberPasswordDto){
+                                               @RequestBody MemberPasswordDto memberPasswordDto) {
 
+        //사용하지 않는 코드 service 레이어로 이동
+//        log.info("요청자={}", authentication.toString());
+//        log.info("인증여부={}", authentication.isAuthenticated());
+////        log.info("전송된값={}", memberPasswordDto.toString());
+//        if (!authentication.isAuthenticated()) {
+//            log.info("로그인 정보 에러, 사용자 정보 없음");
+//            return ResponseEntity.badRequest().body("로그인 정보가 없습니다.");
+//        }
 
-        log.info("요청자={}",authentication.toString());
-        log.info("인증여부={}",authentication.isAuthenticated());
-        if (!authentication.isAuthenticated()) {
-            return ResponseEntity.badRequest().body("로그인 정보가 없습니다.");
+        boolean validResult = memberService.validateUserAuthentication(authentication, memberPasswordDto.getMemberEmail());
+
+        if(validResult) {
+            log.info("비밀번호 변경 요청 유저 = {}, 인증결과 = {}", memberPasswordDto.getMemberEmail(),validResult);
+            boolean result = memberService.updateMemberPassword(memberPasswordDto);//DB에서 유저의 PW 변경
+            log.info("비밀번호 변경 요청 결과={}", result);
+            if (result) {
+                return ResponseEntity.ok().body("ok");
+            }
+            return ResponseEntity.badRequest().body(result);
         }
-
-        //인증 정보를 파싱합니다.
-        CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        //로그인 인증 유저와 닉네임 변경 유저가 동일한지 확인
-        if (memberPasswordDto.getMemberEmail().equals(customUser.getUsername())){
-
-            log.info("닉네임 변경 요청 유저 = {}",memberPasswordDto.getMemberEmail());
-            boolean result = memberService.updateMemberPassword(memberPasswordDto);
-            log.info("닉네임 변경 요청 결과={}",result);
-
-//            customUser.memberName = memberPasswordDto.getMemberName();
-            Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser
-                    ,authentication.getCredentials()
-                    ,authentication.getAuthorities());
-
-            SecurityContextHolder.getContext().setAuthentication(newAuthentication);
-
-            return ResponseEntity.ok().body(result);
-        }else{
-            return ResponseEntity.badRequest().body("계정 정보가 없습니다.");
-
-        }
-
-
-
-
-
+        return ResponseEntity.badRequest().body("요청에러");
 
 
     }
 
 
+
+
     @ResponseBody
     @GetMapping("/test52")
-    public String test52(Authentication authentication){
+    public String test52(Authentication authentication) {
 //
 //        CustomUser customUser =  (CustomUser) SecurityContextHolder.getContext().getAuthentication();
 //        Object principal = customUser.toString();
 
 //        log.info("유저정보={}",principal.toString());
         return "ok";
-
     }
 
 
     //spring securtiy session 변경 테스트입니다.
     @ResponseBody
     @GetMapping("/testU")
-    public String sessionUpdateTest(Authentication authentication){
+    public String sessionUpdateTest(Authentication authentication) {
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
-        customUser.memberName= "테스트닉네임";
-        
+        customUser.memberName = "테스트닉네임";
+
         Authentication newAuthentication = new UsernamePasswordAuthenticationToken(customUser, authentication.getCredentials(), authentication.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(newAuthentication);
         return "ok";
@@ -334,9 +334,21 @@ public class MemberController {
     }
 
     @ResponseBody
+    @GetMapping("/vaildTest")
+    public ResponseEntity validateUserAuthenticationTest(Authentication authentication){
+        String email = "tes2t@gmail.com";
+        boolean validResult = memberService.validateUserAuthentication(authentication,email);
+        if (validResult){
+        return ResponseEntity.ok("OK");
+        };
+        return ResponseEntity.badRequest().body("서버에러");
+
+    };
+
+    @ResponseBody
     @GetMapping("/testO")
     public String sessionOutputTest(Authentication authentication,
-                               HttpServletRequest request ){
+                                    HttpServletRequest request) {
 
         Enumeration<String> attributeNames = request.getSession().getAttributeNames();
         while (attributeNames.hasMoreElements()) {
@@ -344,15 +356,16 @@ public class MemberController {
             Object attributeValue = request.getSession().getAttribute(attributeName);
             log.info("Attribute Name: " + attributeName + ", Value: " + attributeValue);
         }
-       
+
         CustomUser customUser = (CustomUser) authentication.getPrincipal();
+        log.info("CustomUser = {}",customUser.memberName);
         log.info("Authentication Details:");
         log.info("Principal: {}", authentication.getPrincipal());
         log.info("Authorities: {}", authentication.getAuthorities());
         log.info("Credentials: {}", authentication.getCredentials());
         log.info("Is Authenticated: {}", authentication.isAuthenticated());
         log.info("Name: {}", authentication.getName());
-        log.info("Details",authentication.getDetails());
+        log.info("Details", authentication.getDetails());
 
         return "ok";
     }
