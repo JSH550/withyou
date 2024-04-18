@@ -10,9 +10,11 @@ import com.js.withyou.data.dto.place.PlaceDetailDto;
 import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.dto.Region.RegionDto;
 import com.js.withyou.data.dto.SearchSuggestionDto;
+import com.js.withyou.data.dto.place.PlaceListDto;
 import com.js.withyou.service.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
@@ -47,39 +50,27 @@ public class PlaceController {
         //모든 category list 전송하여 drop down으로 구현
         List<CategoryDto> allCategories = categoryService.getAllCategories();
         List<RegionDto> allRegions = regionService.getAllRegions();
-
-
         model.addAttribute("categories", allCategories);
         model.addAttribute("regions", allRegions);
-
         return "/place/place-addform";
-
     }
 
     /**
      * 시설(place) 의 상세정보를 보여주는 메서드입니다.
-     *
      * @param placeId
      * @param model
      * @return
      */
-
     //    @ResponseBody
     @GetMapping("/places/{placeId}")
     public String showPlaceDetail(@PathVariable @NotNull Long placeId,
                                   @SessionAttribute(value = "LOGIN_MEMBER_EMAIL", required = false) String memberEmail,
                                   Model model) {
-//        if (memberEmail.isEmpty()) {
-//            memberEmail = "kim@gmail.com";
-//        }
         log.info("요청된 placeId={}", placeId);
-//        id값 조회해서 해당 place 정보 view로 넘겨주세요
-        PlaceDetailDto foundPlaceDto = placeService.getPlaceDetailDtoByPlaceId(placeId);
+        PlaceDetailDto foundPlaceDto = placeService.getPlaceDetailDtoByPlaceId(placeId);//placeId로 시설(place) 정보 검색
 //        log.info("요청된 장소의 위도={},경도={}", foundPlaceDto.getPlaceLatitude(), foundPlaceDto.getPlaceLongitude());
         log.info("요청된 장소의 정보", foundPlaceDto.toString());
-
         model.addAttribute("placeDto", foundPlaceDto);
-
         return "/place/place-detail";
     }
 
@@ -91,7 +82,6 @@ public class PlaceController {
         }
     }
 
-    ;
 
     /*
      * 클라이언트가 검색어를 입력하면 그 검색어를 바탕으로 시설을 검색합니다.
@@ -116,31 +106,56 @@ public class PlaceController {
         return "/place/place-search";
     }
 
-
+    /**
+     * 비동기 방식으로 유저가 선택한 추천 검색어로 장소(place)를 검색하고, 그데이터를 반환하는 API입니다.
+     * @param searchSuggestionDto
+     * @return 검색 결과를 PlaceListDto로 변환하여 반환합니다.
+     */
     @ResponseBody
     @PostMapping("/search")
-    public ResponseEntity<List<PlaceDto>> returnSearchResult(@RequestBody SearchSuggestionDto searchSuggestionDto,
-                                                             Model model) {
-
-        log.info("search 요청 값={}",searchSuggestionDto.toString());
-        if (searchSuggestionDto==null) {
-            List<PlaceDto> placeDtoList = new ArrayList<>();
-
-            return ResponseEntity.ok(placeDtoList);
-        }
+    public ResponseEntity<List<PlaceListDto>> returnSearchResult(@RequestBody SearchSuggestionDto searchSuggestionDto) {
 
 
-        //타입하고 id 받아오기
-        //1. region으로 place 검색하기
-        //2. subregion으로 place 검색하기.
+        List<PlaceListDto> placesBySearchSuggestion = placeService.getPlacesBySearchSuggestion(searchSuggestionDto);
+
+        return ResponseEntity.ok(placesBySearchSuggestion);
+
+    
+        //사용하지않는코드, service 계층으로 이동
+        //요청한 값이 비어있으면 빈 List 를 반환합니다.
+//        log.info("search 요청 값={}", searchSuggestionDto.toString());
+//        if (searchSuggestionDto == null) {
+//            List<PlaceListDto> placeListDtoList = new ArrayList<>();//클라이언트로 전송하기 위한 객체입니다.
+//            return ResponseEntity.ok(placeListDtoList);
+//        }
+
+//        //페이지네이션을 위한 객체입니다. 디폴트 사이즈는 20입니다. 페이지넘버는 0부터 시작합니다.
+//        PageRequest pageRequest = PageRequest.of(searchSuggestionDto.getPageNumber(), 20);
+//
+//        //요청한 값의 타입이 subRegion이면 subRegion ID를 통해 시설(place)를 검색하여 반환합니다.
+//        if (searchSuggestionDto.getDataType().equals("subRegion")) {
+//            // 시군구(subRegion) ID가 요청된 검색과 동일한 시설(Place)을 반환합니다.
+//            List<PlaceListDto> placeBySubRegionId = placeService.getPlaceBySubRegionId(searchSuggestionDto.getId(),pageRequest);
+//            //출력 테스트용 로깅입니다.
+//            for (PlaceListDto placeListDto : placeBySubRegionId) {
+//                log.info("찾은 place 값 ={}", placeListDto.toString());
+//            }
+//            return ResponseEntity.ok(placeBySubRegionId);
+//            //요청한 값의 타입이 region(시도)이면 region ID를 통해 시설(place)를 검색하여 반환합니다.
+//
+//        } else if (searchSuggestionDto.getDataType().equals("region")) {
+//            // 시군구(subRegion) ID가 요청된 검색과 동일한 시설(Place)을 출력합니다.
+//            List<PlaceListDto> placesByRegionId = placeService.getPlacesByRegionId(searchSuggestionDto.getId(),pageRequest);
+//            return ResponseEntity.ok(placesByRegionId);
+//            //출력 테스트용 로깅입니다.
+////            for (PlaceListDto placeListDto : placesByRegionId) {
+////                log.info("찾은 place 값 ={}", placeListDto.toString());
+////            }
+
+//        }
 
 
-        List<PlaceDto> placeDtoList = placeService.searchPlacesByKeyWord(searchSuggestionDto.getName());
-        for (PlaceDto placeDto : placeDtoList) {
-            log.info("검색된값 = {}",placeDto.toString());
 
-        }
-        return ResponseEntity.ok(placeDtoList);
 
     }
 
@@ -157,40 +172,55 @@ public class PlaceController {
     public ResponseEntity<List<SearchSuggestionDto>> showSearchSuggest(@RequestBody KeywordDto keyword,
                                                                        Model model) {
         //1. 지역(region) 이름으로 검색
-        List<SearchSuggestionDto> searchSuggestionDtoList = new ArrayList<>();//클라이언트에게 전달하기 위한 DTO List 입니다.
+//        List<SearchSuggestionDto> searchSuggestionDtoList = new ArrayList<>();//클라이언트에게 전달하기 위한 DTO List 입니다.
+        List<SearchSuggestionDto> searchSuggestions = placeService.getSearchSuggestions(keyword);
 
         log.info("유저가 요청한 키워드 ={}", keyword.getKeyword());
-        List<RegionNameDto> regionNameDtoByKeyword = regionService.getRegionNameDtoByKeyword(keyword.getKeyword());
-        if (!regionNameDtoByKeyword.isEmpty()) {
-            for (RegionNameDto regionNameDto : regionNameDtoByKeyword) {
-//                SearchSuggestionDto.builder().dataType("region").name(regionNameDto.getRegionName()).build();
-                searchSuggestionDtoList.add(
-                        SearchSuggestionDto.builder()
-                                .id(regionNameDto.getRegionId())
-                                .dataType("region")
-                                .name(regionNameDto.getRegionName())
-                                .build()
-                );
-            }
-        }
+//        List<RegionNameDto> regionNameDtoByKeyword = regionService.getRegionNameDtoByKeyword(keyword.getKeyword());
+//        if (!regionNameDtoByKeyword.isEmpty()) {
+//            for (RegionNameDto regionNameDto : regionNameDtoByKeyword) {
+////                SearchSuggestionDto.builder().dataType("region").name(regionNameDto.getRegionName()).build();
+//                searchSuggestionDtoList.add(
+//                        SearchSuggestionDto.builder()
+//                                .id(regionNameDto.getRegionId())
+//                                .dataType("region")
+//                                .name(regionNameDto.getRegionName())
+//                                .build()
+//                );
+//            }
+//        }
+//
+//        //table
+//        //name
+//        //id
+//
+//        //2. 세부지역(subregion) 이름으로 검색
+//        List<SubRegionSearchDto> subRegionSearchDtosByKeyword = subRegionService.getSubRegionSearchDtosByKeyword(keyword.getKeyword());
+//        if (!subRegionSearchDtosByKeyword.isEmpty()) {
+//            for (SubRegionSearchDto subRegionSearchDto : subRegionSearchDtosByKeyword) {
+//                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
+//                        .id(subRegionSearchDto.getSubRegionId())
+//                        .dataType("subRegion")
+//                        .name(subRegionSearchDto.getSubRegionNameLong())
+//                        .build());
+//            }
+//        }
+//
+//        //3. 시설(place) 이름으로 검색
+//        PageRequest pageRequest = PageRequest.of(0, 20);
+//        List<PlaceListDto> placeListDtoList = placeService.getPlaceByKeywordAndPageable(keyword.getKeyword(),pageRequest);
+//        if (!placeListDtoList.isEmpty()) {
+//            for (PlaceListDto placeListDto : placeListDtoList) {
+//                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
+//                        .id(placeListDto.getPlaceId())
+//                        .dataType("place")
+//                        .name(placeListDto.getPlaceName())
+//                        .build());
+//            }
+//        }
 
-        //table
-        //name
-        //id
 
-        //2. 세부지역(subregion) 이름으로 검색
-        List<SubRegionSearchDto> subRegionSearchDtosByKeyword = subRegionService.getSubRegionSearchDtosByKeyword(keyword.getKeyword());
-        if (!subRegionSearchDtosByKeyword.isEmpty()) {
-            for (SubRegionSearchDto subRegionSearchDto : subRegionSearchDtosByKeyword) {
-                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
-                        .id(subRegionSearchDto.getSubRegionId())
-                        .dataType("subRegion")
-                        .name(subRegionSearchDto.getSubRegionNameLong())
-                        .build());
-            }
-        }
-
-        return ResponseEntity.ok(searchSuggestionDtoList);
+        return ResponseEntity.ok(searchSuggestions);
 
 //        return "ok";
     }
@@ -282,7 +312,6 @@ public class PlaceController {
     @ResponseBody
     @PostMapping("places/{placeId}/delete_favorite")
     public ResponseEntity<String> removePlaceFavorite(@PathVariable(required = false) String placeId
-            , @SessionAttribute(name = "LOGIN_MEMBER_EMAIL", required = false) String memberEmail
             , Authentication authentication
     ) {
 
