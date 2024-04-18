@@ -13,7 +13,23 @@
 </head>
 
 <body>
+
+
+
+    <!-- 로딩화면-->
+    <div class="overlay d-none">
+        <div class="loading-spin spinner-border  text-info fixed-top"
+            role="status" style="width: 7rem; height: 7rem; top: 40%; left: 40%;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+
     <div class="container d-flex">
+
+
+
+
         <div class="col">
 
             <!-- 헤더입니다. -->
@@ -21,9 +37,10 @@
                 <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
                 <div class="col-1" onclick="goBackCurrentPage()">
                     <!-- 화살표 이미지 -->
-                    <svg class="bi bi-arrow-left" fill="currentColor" height="30" viewBox="0 0 16 16"
-                        width="30" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+                    <svg class="bi bi-arrow-left" fill="currentColor" height="30" viewBox="0 0 16 16" width="30"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
                             fill-rule="evenodd" />
                     </svg>
                 </div>
@@ -33,8 +50,8 @@
                 <!-- 홈으로 바로가기 버튼입니다. -->
                 <div class="col-1" onclick="goHomePage()">
                     <!-- 집 이미지 -->
-                    <svg class="bi bi-house-door" fill="currentColor" height="30" viewBox="0 0 16 16"
-                        width="30" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="bi bi-house-door" fill="currentColor" height="30" viewBox="0 0 16 16" width="30"
+                        xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z" />
                     </svg>
@@ -92,10 +109,19 @@
                 </div>
             </form>
 
-            <!-- 추천 검색어 창 (지역) 입니다. -->
-            <div class="suggest-region-container col-12  w-100 bg-white">
-                <div class="suggest-region-box">
-                    <span></span>
+            <div class="suggest-container">
+                <!-- 추천 검색어 창 (지역) 입니다. -->
+                <div class="suggest-region-container col-12  w-100 bg-white">
+                    <div class="suggest-region-box">
+                        <span></span>
+                    </div>
+                </div>
+
+                <!-- 추천 검색어 창 (시설명) 입니다. -->
+                <div class="suggest-place-container col-12  w-100 bg-white">
+                    <div class="suggest-place-box">
+                        <span></span>
+                    </div>
                 </div>
             </div>
 
@@ -161,6 +187,16 @@
         function redirectPage(detailUrl) {
             utils.redirectPage(detailUrl)
         }
+
+        const goHomePage = () => {
+            utils.goHomePage();
+        }
+
+        let pageNumber = 0;
+
+        let dataType = '';
+        let id = 0;
+        let clickedContent = '';
 
 
         var goPlaceDetailPage = () => {
@@ -237,114 +273,215 @@
             // console.log('제안 박스 만들기 진입')
 
             //추천 검색어 박스를 담을 컨테이너입니다.
+            let suggestContainer = document.querySelector('.suggest-container');
+            //시도(region) 시군구(subRegion) 추천 검색어 저장 컨테이너입니다.
             let regionContainer = document.querySelector('.suggest-region-container');
+            //시설(place) 시군구(subRegion) 추천 검색어 저장 컨테이너입니다.
+            let placeContainer = document.querySelector('.suggest-place-container');
 
-            regionContainer.classList.remove("d-none")
+            //display-none 상태 해제 추천검색어 클릭시 dispaly-none으로 바뀝니다.
+            suggestContainer.classList.remove("d-none")
 
-            let regionBox = '';
+            //서버로부터 받은 시도(region) 시군구(subRegion) 데이터 저장 객체
+            let regionBox = [];
+            let regionBoxHTML = ''; // 문자열로 초기화
+
+            //서버로부터 받은 시설(place) 데이터 저장 객체
+            let placeBox = [];
+            let placeBoxHTML = ''; // 문자열로 초기화
+
+
+
+            //서버에서 받은 데이터 타입이 시도(region) 시군구(subRegion)인 데이터들 객체에 저장
             for (let i = 0; i < resultData.length; i++) {
-                console.log("출력할 데이터=", resultData[i])
-                regionBox +=
-                    `<div class="suggest-region-box mt-2" data-id = ${resultData[i]['id']} data-type =${resultData[i]['dataType']}>
+                if (resultData[i]['dataType'] == "region" || resultData[i]['dataType'] == "subRegion") {
+                    regionBox.push(resultData[i]);
+                }
+            }
+            //시도(region) 시군구(subRegion) 추천검색어 박스를 생성하여 객체에 저장.
+            for (let i = 0; i < regionBox.length; i++) {
+                console.log("출력할 데이터=", regionBox[i])
+                regionBoxHTML +=
+                    `<div class="suggest-region-box suggest mt-2" data-id = ${regionBox[i]['id']} data-type =${regionBox[i]['dataType']}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                 <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                 </svg>
-                    <span>${resultData[i]['name']}</span>
+                    <span>${regionBox[i]['name']}</span>
                 </div>`
             };
 
 
+            //서버에서 받은 데이터 타입이 시설(place) 인 데이터들 객체에 저장
+            for (let i = 0; i < resultData.length; i++) {
+                if (resultData[i]['dataType'] == "place") {
+                    placeBox.push(resultData[i]);
+                }
+            }
 
-            regionContainer.innerHTML = regionBox;
+            // 시설(place)  추천검색어 박스를 생성하여 객체에 저장.
+            for (let i = 0; i < placeBox.length; i++) {
+                // console.log("출력할 데이터=", placeBox[i])
+                placeBoxHTML +=
+                    `<div class="suggest-place-box mt-2 suggest" data-id = ${placeBox[i]['id']} data-type =${placeBox[i]['dataType']}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="blue" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+            <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+          </svg>
+          <span>${placeBox[i]['name']}</span>
+        </div>`
+            };
 
 
-            //만들어진 box들을 쿼리셀렉터로 찾습니다.
-            let allSuggestBoxes = document.querySelectorAll(".suggest-region-box")
+            //추천 검색어 컨테이너에 추천검색어 DOM 추가
+            regionContainer.innerHTML = regionBoxHTML;
+            placeContainer.innerHTML = placeBoxHTML;
+
+            //만들어진 지역 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
+            let regionSuggestBoxes = document.querySelectorAll(".suggest-region-box")
+
+            //만들어진 place 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
+            let placeSuggestBoxes = document.querySelectorAll(".suggest-place-box")
 
             //만들어진 box들에 이벤트리스너를 붙입니다.
-            allSuggestBoxes.forEach(suggestBox => {
-
+            regionSuggestBoxes.forEach(suggestBox => {
                 /**
                  * 1. 유저가 클릭한 추천 검색어를 검색창으로 옮기고
                  * 2. 비동기 방식으로 서버로부터 place 정보를 받아와 렌더링합니다.
                  * 3. 추천 검색어 창을 dispaly : none으로 숨깁니다.
                 */
-                suggestBox.addEventListener('click', function () {
-                    let keyword;
-                    const dataType = suggestBox.dataset.type;//클릭한 데이터의 type(region, subRegion 등)을 저장합니다.
-                    const id = suggestBox.dataset.id;//클릭한 데이터의 id값을 저장합니다
-                    const clickedContent = suggestBox.querySelector("span").textContent;//클릭한 데이터의 이름값을 저장합니다.
+                suggestBox.addEventListener('click', () => handleRegionSuggestBoxClick(suggestBox))
+            })
 
-                    // console.log("클릭한 박스의 타입 =" + suggestBox.dataset.type);
-                    // console.log("클릭한 박스 내용=" + clickedContent);
-
-                    //검색창 내용(value)를 클릭한 박스의 내용으로 바꿉니다.
-                    document.querySelector('#search-input').value = clickedContent;
-
-                    regionContainer.classList.add("d-none");//유저가 추천검색어를 클릭하면 추천검색어 창을 숨깁니다.
-
-                    let postData = {}; //비동기 방식으로 POST요청을 보내기 위한 배열입니다.
-
-
-                    postData['id'] = id;
-                    postData['dataType'] = dataType;
-                    postData['name'] = clickedContent;
-
-
-                    fetch('http://localhost:8080/search', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(postData)
-                    })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error("서버 에러 발생");
-                            } else {
-                                return response.json();//서버에서 받아온 데이터를 JSON으로 변환합니다.
-                            }
-                        }).then(data => {
-
-                            let container = document.querySelector('.place-information-container');
-                            let listBoxes = '';
-                            data.forEach(element => {
-
-                                // console.log("받아온 값");
-                                // console.log(element.placeId);
-
-                                listBoxes = addPlaceListBox(element, listBoxes);
-                                
-
-
-
-
-                            });
-                            // console.log(listBoxes);
-                            container.innerHTML = listBoxes;
-                            showPlaceDetail();
-
-                        })
-
-                }
-                )
+            placeSuggestBoxes.forEach(suggestBox => {
+                suggestBox.addEventListener('click', () => handlePlaceSuggestClick(suggestBox))
 
             });
-
 
         }
 
 
-      
+
+        // 추천 검색어 클릭 이벤트를 처리하는 함수 입니다.
+        // 파라미터는 클릭한 추천 검색어 div 박스입니다.
+        const handleRegionSuggestBoxClick = (suggestBox) => {
+
+            //추천검색어 DOM 전체를 포함하는 컨테이너입니다.
+            let suggestContainer = document.querySelector('.suggest-container');
+            suggestContainer.classList.add("d-none");//유저가 추천검색어를 클릭하면 추천검색어 창을 숨깁니다.
+
+            let keyword;
+            dataType = suggestBox.dataset.type;//클릭한 데이터의 type(region, subRegion 등)을 저장합니다.
+            id = suggestBox.dataset.id;//클릭한 데이터의 id값을 저장합니다
+            clickedContent = suggestBox.querySelector("span").textContent;//클릭한 데이터의 이름값을 저장합니다.
+
+
+            //검색창 내용(value)를 클릭한 박스의 내용으로 바꿉니다.
+            document.querySelector('#search-input').value = clickedContent;
+
+
+            //클릭한 추천검색어로 서버에서 검색 결과를 받아옵니다.
+            //place 정보를 box에 담아 DOM으로 나타냅니다
+            handleSearchRequest(id, dataType, clickedContent);
+
+        }
+
+        const handlePlaceSuggestClick = (suggestBox) => {
+            console.log("place 박스 클릭감지");
+            const placeId = suggestBox.dataset.id;
+             redirectPage(`places/${placeId}`);
+
+        }
+
+
+
+        //스크롤을 끝까지 내리면 place 정보를 더 받아오는 함수입니다.
+        const handelScrollEndToAddPlaceBox = () => {
+            //현재 스크롤 위치
+            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            //화면의 높이
+            let windowHeight = window.innerHeight;
+
+
+            //문서 전체의 높이
+            let documentHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            if (scrollTop + windowHeight >= documentHeight) {
+                console.log("pageNumber=" + pageNumber);
+
+
+
+                let suggestId = id;
+                let suggestDataType = dataType;
+                let suggestConent = clickedContent;
+
+
+                showLoadingScreen();
+                handleSearchRequest(suggestId, suggestDataType, suggestConent);
+
+
+                pageNumber++;
+                window.scrollTo(0, scrollTop);
+
+                // console.log("스크롤 관련 정보" +"scrollTop="+ scrollTop+"windowHegith" +windowHeight +"documentHegith" +documentHeight);
+
+                // 여기에 실행할 함수 호출
+            }
+        }
+
+        window.addEventListener('scroll', handelScrollEndToAddPlaceBox);
+
+
+        const handleSearchRequest = (id, dataType, clickedContent) => {
+            let postData = {}; //비동기 방식으로 POST요청을 보내기 위한 배열입니다.
+            postData['id'] = id;//추천 검색어의 DB table에서의 FK입니다.
+            postData['dataType'] = dataType;//추천검색어 검색 타입입니다.
+            postData['name'] = clickedContent;//추천검색어에 저장되어있던 객체의 이름입니다. 예시: 경기도
+            postData['pageNumber'] = pageNumber;//전역변수입니다.
+
+
+            fetch('http://localhost:8080/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(postData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("서버 에러 발생");
+                    } else {
+                        return response.json();//서버에서 받아온 데이터를 JSON으로 변환합니다.
+                    }
+                }).then(data => {
+
+                    let container = document.querySelector('.place-information-container');
+                    let listBoxes = '';
+                    data.forEach(element => {
+
+                        // console.log("받아온 값");
+                        // console.log(element.placeId);
+                        listBoxes = addPlaceListBox(element, listBoxes);
+                    });
+                    // console.log(listBoxes);
+                    let containerInnerHtml = container.innerHTML;
+                    container.innerHTML = containerInnerHtml + listBoxes;
+                    showPlaceDetail();
+                }).catch(error => {
+                    alert('에러 발생 함수' + error);
+                })
+        }
+        // }
+
+
+
+
+
 
 
         /**
-         * 
-         * 
+         * 서버로부터 받아온 data로 place 정보를 list 형태로 만드는 함수입니다.
          * @param {data} place 서버로부터 받아온 data입니다.
          * @param listBoxes placeList를 저장할 DOM입니다.
          * @returns placeList를 담은 DOM을 반환합니다.
-         */ 
+         */
         function addPlaceListBox(place, listBoxes) {
             listBoxes +=
                 `<div class="justify-content-between w-100 mt-1 place-list-box" id="place-information-box"
@@ -359,27 +496,46 @@
                      <div id="place-img-box">
                              </div>
                       </div>`
-
             return listBoxes;
 
         }
 
-    /** place list box를 클릭시 해당 place의 상세 페이지로 이동하는 함수입니다. 
-     * 
-     * 
-     * */    
-    const showPlaceDetail = () =>{
-    let placeListBoxes=  document.querySelectorAll('.place-list-box');
-    placeListBoxes.forEach(placeBox => {
-        placeBox.addEventListener('click',function(){
-            const detailUrl = `places/${placeBox.dataset.placeId}`
-            console.log('URL = '+detailUrl);
-            redirectPage(detailUrl);//클릭한place의 상세 페이지로 이동합니다.
-        })
-        
-    });
-}
+        /** place list box를 클릭시 해당 place의 상세 페이지로 이동하는 함수입니다.
+         * */
+        const showPlaceDetail = () => {
+            let placeListBoxes = document.querySelectorAll('.place-list-box');
+            placeListBoxes.forEach(placeBox => {
+                placeBox.addEventListener('click', function () {
+                    const detailUrl = `places/${placeBox.dataset.placeId}`
+                    console.log('URL = ' + detailUrl);
+                    redirectPage(detailUrl);//클릭한place의 상세 페이지로 이동합니다.
+                })
 
+            });
+        }
+
+
+
+        /**
+         * 로딩화면을 보여주는 함수입니다. 1초뒤 로딩화면이 사라집니다.
+         */
+        const showLoadingScreen = () => {
+            console.log("변경진입");
+
+            const loadingScreen = document.querySelector('.overlay')//로딩화면 객체에 저장.
+            loadingScreen.classList.remove('d-none');//부트스트랩 display-none 클래스 제거
+            loadingScreen.classList.add('d-block');//부트스트랩 display-block 클래스 추가
+            loadingScreen.addEventListener('click', function (event) {
+            })
+
+            //1초뒤 로딩화면을 숨깁니다.
+            setTimeout(function () {
+                document.body.style.overflow = '';
+                loadingScreen.classList.remove('d-block');
+                loadingScreen.classList.add('d-none');
+            }, 1000)
+
+        }
 
 
     </script>
