@@ -1,5 +1,7 @@
 package com.js.withyou.service;
 
+import com.js.withyou.data.KeywordDto;
+import com.js.withyou.data.dto.SearchSuggestionDto;
 import com.js.withyou.data.dto.SubRegion.SubRegionDto;
 import com.js.withyou.data.dto.place.PlaceCreateDto;
 import com.js.withyou.data.dto.place.PlaceDetailDto;
@@ -8,6 +10,7 @@ import com.js.withyou.data.dto.place.PlaceListDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
 import com.js.withyou.data.entity.SubRegion;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -37,6 +40,14 @@ public interface PlaceService {
 
     List<PlaceDto> getPlaceByKeyword(String keyword);
 
+    /**
+     * 특정 키워드를 포함한 시설(place) List를 페이지네이션으로 반환합니다.
+     * @param keyword
+     * @param pageable 페이지네이션을 위한 객체입니다.
+     * @return PlaceListDto
+     */
+    List<PlaceListDto> getPlaceByKeywordAndPageable(String keyword, Pageable pageable);
+
     List<PlaceDto> getPlaceByCategory(String keyword);
 
 
@@ -45,11 +56,30 @@ public interface PlaceService {
 
 
     /**
-     * 특정 subRegion와 관계가 있는 place를 검색하여 반환합니다.
-     * @param subRegionId
+     * 유저가 클릭한 추천 검색어를 바탕으로 시설(place) List를 반환합니다.
+     * 추천검색어 타입에는 시도(region), 시군구(subRegion)이 있으며 그외타입은 시설명(placeName)으로 검색합니다.
+     * @param searchSuggestionDto 유저가 클릭한 추천검색어 입니다. 타입(시군구,시도 등)과 이름, priamry key, 페이지정보 를담고있습니다.
+     * @return PlaceListDto DTO 형태로 List를 반환합니다.
+     */
+    List<PlaceListDto> getPlacesBySearchSuggestion(SearchSuggestionDto searchSuggestionDto);
+
+    /**
+     * 시군구(subRegion)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * @param subRegionId DB 검색을 위한 시군구(subRegion)의 primary key 입니다.
+     * @param pageable 페이지네이션을 위한 객체입니다.
      * @return PlaceListDto List 형식으로 반환합니다.
      */
-    List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId);
+    List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId , Pageable pageable);
+
+
+    /**
+     * 시도(region)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * @param regionId DB 검색을 위한 시도(region)의 primary key 입니다.
+     * @param pageable 페이지네이션을 위한 객체입니다.
+     * @return PlaceListDto
+     */
+    List<PlaceListDto> getPlacesByRegionId(Long regionId, Pageable pageable);
+
     List<PlaceDto> getPlaceBySubRegions(List<SubRegionDto> subRegionDtoList);
 
     List<PlaceDto> getPlaceByRegionName(String keyword);
@@ -66,9 +96,17 @@ public interface PlaceService {
 
     /**
      *
-     * @param regionId
+     * @param keywordDto
      * @return
      */
-    List<PlaceListDto> getPlacesByRegionId(Long regionId);
+    List<SearchSuggestionDto> getSearchSuggestions(KeywordDto keywordDto);
+
+
+
+
+
+
+
+//    List<PlaceListDto> getPlacesByRegionId(Long regionId);
 
 }

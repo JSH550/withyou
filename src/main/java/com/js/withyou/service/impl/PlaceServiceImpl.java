@@ -2,8 +2,12 @@ package com.js.withyou.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.js.withyou.data.KeywordDto;
 import com.js.withyou.data.dto.CategoryDto;
+import com.js.withyou.data.dto.Region.RegionNameDto;
+import com.js.withyou.data.dto.SearchSuggestionDto;
 import com.js.withyou.data.dto.SubRegion.SubRegionDto;
+import com.js.withyou.data.dto.SubRegion.SubRegionSearchDto;
 import com.js.withyou.data.dto.place.PlaceCreateDto;
 import com.js.withyou.data.dto.place.PlaceDetailDto;
 import com.js.withyou.data.dto.place.PlaceDto;
@@ -16,6 +20,9 @@ import com.js.withyou.repository.PlaceRepository;
 import com.js.withyou.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -181,6 +188,23 @@ public class PlaceServiceImpl implements PlaceService {
         return foundPlaceDtoList;
     }
 
+    @Override
+    public List<PlaceListDto> getPlaceByKeywordAndPageable(String keyword, Pageable pageable) {
+//        Page<Place> foundPlacePage = placeRepository.findPlaceByPlaceNameContainsAndPageable(keyword, pageable);
+        List<Place> foundPlace = placeRepository.findByPlaceNameContaining(keyword, pageable);
+        //Place를 PlaceListDto로 매핑
+        List<PlaceListDto> placeListDtoList = foundPlace.stream()
+                .map(Place -> PlaceListDto.builder()
+                        .placeId(Place.getPlaceId())
+                        .placeName(Place.getPlaceName())
+                        .placeRoadAddress(Place.getPlaceRoadAddress())
+                        .categoryName(Place.getCategory().getCategoryName())
+                        .subRegionName(Place.getSubRegion().getSubRegionName())
+                        .build()).collect(Collectors.toList());
+        return placeListDtoList;
+//        return null;
+    }
+
     /*
      * 검색어를 포함한 카테고리를 조회하고, 해당 카테고리에 속하는 장소를 저장하는 메서드입니다.
      * 이 메서드는 검색된 카테고리를 조회하기 위해 1회의 쿼리를 실행하며, 각 검색된 카테고리에 매핑된 장소를 조회하기 위해 추가적인 n회의 쿼리를 실행합니다.
@@ -205,7 +229,7 @@ public class PlaceServiceImpl implements PlaceService {
     public List<PlaceDto> getPlaceBySubRegionIdList(List<Long> subRegionIdList) {
         List<PlaceDto> foundPlaceDtoList = new ArrayList<>();
         for (Long subRegionId : subRegionIdList) {
-            List<Place> foundPlaceList = placeRepository.findBySubregionId(subRegionId);//시군구 Id로 Place 검색
+            List<Place> foundPlaceList = placeRepository.findBySubregionId(subRegionId,Pageable.unpaged());//시군구 Id로 Place 검색
             for (Place place : foundPlaceList) {
                 foundPlaceDtoList.add(convertPlaceDto(place));
             }
@@ -214,9 +238,32 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId) {
+    public List<PlaceListDto> getPlacesBySearchSuggestion(SearchSuggestionDto searchSuggestionDto) {
 
-        List<Place> placeList = placeRepository.findBySubregionId(subRegionId);
+        //searchSuggestionDto null체크, null일경우 빈리스트를 반환합니다.
+        if (searchSuggestionDto == null) {
+            return Collections.emptyList();
+        }
+
+        //페이지네이션을 위한 객체입니다. 디폴트 사이즈는 20입니다. 페이지넘버는 0부터 시작합니다.
+        PageRequest pageRequest = PageRequest.of(searchSuggestionDto.getPageNumber(), 20);
+
+        // 타입이 시군구(subRegion)일 경우, 해당 시군구에 속한 place를 반환합니다.
+        if (searchSuggestionDto.getDataType().equals("subRegion")) {
+            // 시군구(subRegion) ID가 요청된 검색과 동일한 시설(Place)을 반환합니다.
+            return getPlaceBySubRegionId(searchSuggestionDto.getId(),pageRequest);
+            // 타입이 시도(region)일 경우, 해당 시도에 속한 place를 반환합니다.
+        } else if (searchSuggestionDto.getDataType().equals("region")) {
+            return getPlacesByRegionId(searchSuggestionDto.getId(),pageRequest);
+            // 그외 타입일 경우 시설명(placeName)으로 검색하여 반환합니다.
+        }else {
+            return  getPlaceByKeywordAndPageable(searchSuggestionDto.getName(), pageRequest);
+        }
+    }
+
+    @Override
+    public List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId, Pageable pageable) {
+        List<Place> placeList = placeRepository.findBySubregionId(subRegionId, pageable);
         List<PlaceListDto> placeListDtoList = placeList.stream()
                 .map(Place -> PlaceListDto.builder()
                         .placeId(Place.getPlaceId())
@@ -232,9 +279,10 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<PlaceListDto> getPlacesByRegionId(Long regionId) {
-        List<Place> placeList = placeRepository.findPlacesByRegionId(regionId);
+    public List<PlaceListDto> getPlacesByRegionId(Long regionId, Pageable pageable) {
 
+
+        List<Place> placeList = placeRepository.findPlacesByRegionId(regionId,pageable);
         List<PlaceListDto> placeListDtoList = placeList.stream()
                 .map(Place -> PlaceListDto.builder()
                         .placeId(Place.getPlaceId())
@@ -250,7 +298,6 @@ public class PlaceServiceImpl implements PlaceService {
     /**
      * 주어진 하위 지역(SubRegionDto) 목록에서 장소(PlaceDto)를 검색합니다.
      * 각 하위 지역에는 여러 개의 장소가 연결되어 있을 수 있습니다.
-     *
      * @param subRegionDtoList 하위 지역(SubRegionDto) 목록
      * @return 주어진 하위 지역 목록에 포함된 모든 장소(PlaceDto)의 리스트를 반환합니다.
      */
@@ -265,7 +312,6 @@ public class PlaceServiceImpl implements PlaceService {
 
     /**
      * 특정 키워드로 시도를 찾고, 해당 시도에 속한 하위 시군구에 매핑된 장소를 찾는 메서드입니다.
-     *
      * @param keyword 검색에 사용될 키워드 클라이언트로부터 받습니다.
      * @return 특정 키워드로 검색된 시도의 하위 시군구에 매핑된 장소 목록 입니다.
      */
@@ -310,7 +356,61 @@ public class PlaceServiceImpl implements PlaceService {
 
     }
 
+    @Override
+    public List<SearchSuggestionDto> getSearchSuggestions(KeywordDto keywordDto) {
+        //1. 지역(region) 이름으로 검색
+        List<SearchSuggestionDto> searchSuggestionDtoList = new ArrayList<>();//클라이언트에게 전달하기 위한 DTO List 입니다.
 
+        log.info("유저가 요청한 키워드 ={}", keywordDto.getKeyword());
+        String keyword = keywordDto.getKeyword();
+        List<RegionNameDto> regionNameDtoByKeyword = regionService.getRegionNameDtoByKeyword(keyword);
+        if (!regionNameDtoByKeyword.isEmpty()) {
+            for (RegionNameDto regionNameDto : regionNameDtoByKeyword) {
+                SearchSuggestionDto searchSuggestionDto = new SearchSuggestionDto()
+                        .createSearchSuggestionDto(regionNameDto.getRegionId(), "region", regionNameDto.getRegionName());
+                searchSuggestionDtoList.add(searchSuggestionDto);
+            }
+        }
+        //2. 세부지역(subregion) 이름으로 검색
+        List<SubRegionSearchDto> subRegionSearchDtosByKeyword = subRegionService.getSubRegionSearchDtosByKeyword(keyword);
+        if (!subRegionSearchDtosByKeyword.isEmpty()) {
+            for (SubRegionSearchDto subRegionSearchDto : subRegionSearchDtosByKeyword) {
+                SearchSuggestionDto searchSuggestionDto = new SearchSuggestionDto()
+                        .createSearchSuggestionDto(subRegionSearchDto.getSubRegionId()
+                                , "subRegion"
+                                , subRegionSearchDto.getSubRegionNameLong());
+                searchSuggestionDtoList.add(searchSuggestionDto);
+//                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
+//                        .id(subRegionSearchDto.getSubRegionId())
+//                        .dataType("subRegion")
+//                        .name(subRegionSearchDto.getSubRegionNameLong())
+//                        .build());
+//            }
+            }
+        }
+            //3. 시설(place) 이름으로 검색
+            PageRequest pageRequest = PageRequest.of(0, 20);
+            List<PlaceListDto> placeListDtoList = getPlaceByKeywordAndPageable(keyword,pageRequest);
+            if (!placeListDtoList.isEmpty()) {
+                for (PlaceListDto placeListDto : placeListDtoList) {
+                    SearchSuggestionDto searchSuggestionDto = new SearchSuggestionDto()
+                            .createSearchSuggestionDto(placeListDto.getPlaceId()
+                                    , "place"
+                                    , placeListDto.getPlaceName());
+                    searchSuggestionDtoList.add(searchSuggestionDto);
+
+                    log.info("place명={}",searchSuggestionDto.getName());
+//                searchSuggestionDtoList.add(SearchSuggestionDto.builder()
+//                        .id(placeListDto.getPlaceId())
+//                        .dataType("place")
+//                        .name(placeListDto.getPlaceName())
+//                        .build());
+                }
+            }
+
+        return searchSuggestionDtoList;
+
+    }
 
     /**
      * 유저가 좋아요를 누른 시설(place)들을 DTO List로 반환하는 메서드 입니다.
