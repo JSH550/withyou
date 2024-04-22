@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="../../static/css/main.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" rel="stylesheet">
+    <script crossorigin="anonymous" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+
+
+
+<body>
+
+
+
+
+
+
+
+
+    <div class="container" style="background-color: gainsboro;">
+
+        <!-- 헤더입니다. -->
+        <div class="row p-1 m-0 bg-white fixed-top h-4rem align-center">
+            <!-- 화살표 누르면 이전페이지로 리다이렉트 -->
+            <div class="col-1" onclick="goBackCurrentPage()">
+                <!-- 화살표 이미지 -->
+                <svg class="bi bi-arrow-left" fill="currentColor" height="30" viewBox="0 0 16 16"
+                    width="30" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"
+                        fill-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="col-9 t-left ">
+                <span class=" p-1" style="font-size: 1.1rem;">내가쓴 리뷰</span>
+            </div>
+            <!-- 홈으로 바로가기 버튼입니다. -->
+            <div class="col-1" onclick="goHomePage()">
+                <!-- 집 이미지 -->
+                <svg class="bi bi-house-door" fill="currentColor" height="30" viewBox="0 0 16 16"
+                    width="30" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4.5a.5.5 0 0 0 .5-.5v-4h2v4a.5.5 0 0 0 .5.5H14a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM2.5 14V7.707l5.5-5.5 5.5 5.5V14H10v-4a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5v4z" />
+                </svg>
+            </div>
+
+        </div>
+
+
+
+
+
+
+        <!-- 헤더로 가려지는 부분입니다. -->
+
+
+        <!-- 삭제 모달창 입니다. -->
+        <div aria-hidden="true" aria-labelledby="warn" class="modal fade mt-4" id="delete-warn-modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <span> 리뷰 삭제시 복구 및 재작성이 불가능합니다.
+                            정말 삭제하시겠습니까?
+                        </span>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal" type="button">취소</button>
+                        <button class="btn btn-sm delete-button btn-danger ms-3" type="button">삭제</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 리뷰 list를 보여줄box입니다. -->
+        <div class="row">
+            <div class="w-100 bg-white h-4rem">
+                <p> </p>
+            </div>
+
+
+
+
+
+            <!-- 장소 정보를 보여줄 box 입니다. -->
+            <!-- 들어가야 하는정보 : 시설명, 날짜, 리뷰내용, 별점 -->
+            <div class="justify-content-between w-100 mt-1 bg-white" id="review-information-box"
+                th:attr="data-review-id=${review.reviewId}" th:each="review : ${reviews}">
+                <div class="w-100" id="review-text-box">
+
+                    <!-- 리뷰 헤더입니다. -->
+                    <div class="d-flex justify-content-between p-1">
+                        <div class="p-1 text-muted place-name-box">
+                            <span th:text="${review.placeName}+' >'">시설명</span>
+                        </div>
+                        <!-- 리뷰 편집 버튼입니다. -->
+                        <div class="btn-group">
+                            <button aria-expanded="false" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown"
+                                type="button">
+                                편집
+                            </button>
+                            <ul class="dropdown-menu" style="min-width: 1rem;">
+                                <li class="review-edit"><a class="dropdown-item  cursor-pointer small">리뷰 수정</a></li>
+                                <li class="review-delete"><a class="dropdown-item  cursor-pointer small">리뷰 삭제</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+
+
+                    <div class="p-1 d-flex  align-items-center font-1rem">
+                        <!-- 별점 표현을 위한 div 박스입니다. -->
+                        <div class="stars-container " th:attr="data-stars=${review.reviewRating}">
+                        </div>
+                        <div class="m-1 p-0" style="font-size: 1.1rem;">
+                            <span th:text="${review.reviewRating}">별점</span>
+                        </div>
+                    </div>
+                    <div class="p-1"><span class="h6" th:text="${review.reviewContent}">리뷰내용</span></div>
+
+                    <div class="p-1"><span class="h6" th:text="'작성시간 :'+ ${review.reviewTime} ">작성시간</span></div>
+                </div>
+                <div id="place-img-box">
+                </div>
+            </div>
+        </div>
+
+
+        <script th:inline="javascript">
+
+            //인증된 사용자의 이메일을 객체에 저장합니다.(비동기 방식 요청용)
+            const memberEmail = /*[[${#strings.escapeJavaScript(#authentication.principal.username)}]]*/ null;
+            console.log("요청자 이메일 = " + memberEmail)
+
+    
+            var goBackCurrentPage = () => {
+                console.log('클릭감지');
+                window.history.back()
+            }
+
+            const starsContainer = document.querySelectorAll('.stars-container');
+
+            var goHomePage = () => {
+                window.location.href = window.location.origin;
+            }
+
+
+
+            // 삭제 버튼 누르면
+            // 경고창 띄워주고
+            // 확인 누르면 삭제요청날려주셈~
+
+            let reviewEditBoxes = document.querySelectorAll(".review-edit")
+            let reviewDeleteBoxes = document.querySelectorAll(".review-delete")
+
+
+            reviewDeleteBoxes.forEach(deleteBox => {
+                deleteBox.addEventListener('click', function () {
+                    console.log("진입")
+                    const reviewInfoBox = this.closest('#review-information-box');
+                    const reviewId = reviewInfoBox.getAttribute('data-review-id');
+
+
+
+
+                    console.log("삭제요청 id =" + reviewId);
+                    showDeleteWarnModal(reviewId);
+
+
+
+
+
+                })
+            });
+
+            // 삭제 경고창을 띄우는 함수입니다.
+            //ToDO 모달창 위치 변경
+            const showDeleteWarnModal = (reviewId) => {
+                //삭제 버튼 DOM 객체에 저장
+                const deleteButton = document.querySelector(".delete-button");
+
+                // // 삭제 버튼에 review id를 data-set으로 저장합니다. 서버에서 삭제API 호출시 사용됩니다.
+                // deleteButton.setAttribute('data-id', reviewId);
+
+                deleteButton.addEventListener('click', () => {
+                    handleDeleteRequest(reviewId);
+                })
+
+
+
+
+                const modal = document.querySelector("#delete-warn-modal")
+
+                //부트스트랩 함수를 호출하여 인스턴스를 만듭니다.
+                const deleteWarnModal = new bootstrap.Modal(modal);
+
+                //모달창을 띄웁니다.
+                deleteWarnModal.show();
+
+            }
+
+
+
+            // 삭제 모달창에서 삭제 버튼을 눌렀을때 서버에 비동기 방식으로 삭제 요청을 보냅니다.
+            const handleDeleteRequest = (reviewId) => {
+                let postData = {};
+                console.log("리뷰 삭제 요청 id="+reviewId+"요청자"+memberEmail);
+                postData["memberEmail"] = memberEmail ;
+                postData["reviewId"]  = reviewId ;
+
+                
+                fetch("http://localhost:8080/reviews/delete", {
+                    method: "DELETE",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                    ,
+                    body: JSON.stringify(postData)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(errorMessage => {
+                                throw new Error(errorMessage);
+                            })
+                        } else {
+                            return response.text();
+                        }
+                    }).then(data => {
+                        alert(data);//전송된 데이터를 alert로 출력
+                        window.location.reload();//페이지 새로고침
+                        
+                    }).catch(error => {
+                        alert("에러발생" + error.message);
+                    })
+
+
+
+            }
+
+            // showDeleteWarnModal();
+
+
+
+
+
+            
+
+
+            // 리뷰 별점 개수를 나타내주는 함수입니다.
+            let showReviewStars = () => {
+                starsContainer.forEach(element => {
+                    let stars = element.dataset.stars;//data-set으로 별점을 숫자로 가져옵니다.
+                    let filledStars = '';
+                    //별점의 별 갯수를 채워진 별로 출력합니다. 최소 별점은 1입니다.
+                    for (i = 1; i <= stars; i++) {
+                        filledStars +=
+                            `<svg class="star bi-star-fill" fill="#ffb700" height="20" viewBox="0 0 16 16"
+                        width="20" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />
+                    </svg>`}
+                    for (i = 0; i < 5 - stars; i++) {
+                        filledStars +=
+                            `<svg class="star bi-star-fill" fill="#ffb700" height="20" viewBox="0 0 16 16"
+                        width="20" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                        d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.56.56 0 0 0-.163-.505L1.71 6.745l4.052-.576a.53.53 0 0 0 .393-.288L8 2.223l1.847 3.658a.53.53 0 0 0 .393.288l4.052.575-2.906 2.77a.56.56 0 0 0-.163.506l.694 3.957-3.686-1.894a.5.5 0 0 0-.461 0z" />
+                    </svg>`
+                    }
+
+                    element.innerHTML = filledStars;
+                    console.log(element.dataset.stars);
+                });
+            }
+
+            showReviewStars();
+            //별점 개수 받아와서 반복문 돌려주셈
+
+            //속이꽉찬 별점 이미지입니다.
+            // stars[i].innerHTML = `<path
+            //                     d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z" />`
+
+
+        </script>
+
+</body>
+
+</html>
