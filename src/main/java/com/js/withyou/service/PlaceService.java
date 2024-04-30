@@ -9,7 +9,7 @@ import com.js.withyou.data.dto.place.PlaceDto;
 import com.js.withyou.data.dto.place.PlaceListDto;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
-import com.js.withyou.data.entity.SubRegion;
+import com.js.withyou.data.entity.Region.SubRegion;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -73,12 +73,24 @@ public interface PlaceService {
 
 
     /**
-     * 시도(region)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * 시/도(region)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
      * @param regionId DB 검색을 위한 시도(region)의 primary key 입니다.
      * @param pageable 페이지네이션을 위한 객체입니다.
      * @return PlaceListDto
      */
-    List<PlaceListDto> getPlacesByRegionId(Long regionId, Pageable pageable);
+    List<PlaceListDto> getPlaceListDtoByRegionId(Long regionId, Pageable pageable);
+
+    /**
+     * 시군구(subRegion)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * @param subRegionId
+     * @param pageable
+     * @return PlaceListDto
+     */
+    List<PlaceListDto> getPlaceListDtoBySubregionId(Long subRegionId, Pageable pageable);
+
+
+
+
 
     List<PlaceDto> getPlaceBySubRegions(List<SubRegionDto> subRegionDtoList);
 
