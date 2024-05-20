@@ -2,33 +2,22 @@ package com.js.withyou.service;
 
 import com.js.withyou.data.KeywordDto;
 import com.js.withyou.data.dto.SearchSuggestionDto;
-import com.js.withyou.data.dto.SubRegion.SubRegionDto;
-import com.js.withyou.data.dto.place.PlaceCreateDto;
-import com.js.withyou.data.dto.place.PlaceDetailDto;
-import com.js.withyou.data.dto.place.PlaceDto;
-import com.js.withyou.data.dto.place.PlaceListDto;
+import com.js.withyou.data.dto.Sigungu.SigunguDto;
+import com.js.withyou.data.dto.place.*;
 import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
-import com.js.withyou.data.entity.Region.SubRegion;
+import com.js.withyou.data.entity.Region.Sigungu;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface PlaceService {
 
-    /**
-     * 유저가 좋아요를 누른 시설(place)들을 DTO List로 반환하는 메서드 입니다.
-     * @param memberEmail LikePlaceEntity 에서 유저(member)가 좋아요를 누른 place 정보들을 가져옵니다.
-     * @return List<PlaceDto> PlaceDto형태로 반환합니다(검색창에서 검색했을때와 동일하게 view로 전송하기 위함입니다.)
-     */
-//    @Transactional
-//    List<PlaceDto> getPlaceDtosByMemberEmail(String memberEmail);
-
     void parsXmlFile();
 
 //    void savePlace();
 
-    void savePlace(PlaceCreateDto placeCreateDto, Category category, SubRegion subRegion);
+    void savePlace(PlaceCreateDto placeCreateDto, Category category, Sigungu sigungu);
 
     PlaceDto getPlaceByPlaceId(Long placeId);
 
@@ -51,50 +40,58 @@ public interface PlaceService {
     List<PlaceDto> getPlaceByCategory(String keyword);
 
 
-    //    List<PlaceDto> findPlaceBySubRegionId(List<Long> subRegionIdList);
-    List<PlaceDto> getPlaceBySubRegionIdList(List<Long> subRegionIdList);
+    List<PlaceDto> getPlaceBySigunguIdList(List<Long> sigunguIdList);
 
 
     /**
      * 유저가 클릭한 추천 검색어를 바탕으로 시설(place) List를 반환합니다.
-     * 추천검색어 타입에는 시도(region), 시군구(subRegion)이 있으며 그외타입은 시설명(placeName)으로 검색합니다.
+     * 추천검색어 타입에는 시도(sido), 시군구(sigungu)이 있으며 그외타입은 시설명(placeName)으로 검색합니다.
      * @param searchSuggestionDto 유저가 클릭한 추천검색어 입니다. 타입(시군구,시도 등)과 이름, priamry key, 페이지정보 를담고있습니다.
      * @return PlaceListDto DTO 형태로 List를 반환합니다.
      */
     List<PlaceListDto> getPlacesBySearchSuggestion(SearchSuggestionDto searchSuggestionDto);
 
     /**
-     * 시군구(subRegion)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
-     * @param subRegionId DB 검색을 위한 시군구(subRegion)의 primary key 입니다.
-     * @param pageable 페이지네이션을 위한 객체입니다.
+     * 시군구(sigungu)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     *
+     * @param sigunguId DB 검색을 위한 시군구()의 primary key 입니다.
+     * @param pageable  페이지네이션을 위한 객체입니다.
      * @return PlaceListDto List 형식으로 반환합니다.
      */
-    List<PlaceListDto> getPlaceBySubRegionId(Long subRegionId , Pageable pageable);
+    List<PlaceListDto> getPlaceBySigunguId(Long sigunguId, Pageable pageable);
 
 
     /**
-     * 시/도(region)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
-     * @param regionId DB 검색을 위한 시도(region)의 primary key 입니다.
+     * 시도(sido)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * @param sidoId DB 검색을 위한 시도(sido)의 primary key 입니다.
      * @param pageable 페이지네이션을 위한 객체입니다.
      * @return PlaceListDto
      */
-    List<PlaceListDto> getPlaceListDtoByRegionId(Long regionId, Pageable pageable);
+    List<PlaceListDto> getPlaceListDtoBySidoId(Long sidoId, Pageable pageable);
 
     /**
-     * 시군구(subRegion)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
-     * @param subRegionId
+     * 시군구(sigungu)에 속한 장소(place) List 를 페이지네이션으로 반환합니다.
+     * @param sigunguId
      * @param pageable
      * @return PlaceListDto
      */
-    List<PlaceListDto> getPlaceListDtoBySubregionId(Long subRegionId, Pageable pageable);
+    List<PlaceListDto> getPlaceListDtoBySigunguId(Long sigunguId, Pageable pageable);
+
+
+    List<PlaceListDto>  getPlaceListDtoByPlaceSearchRequestDto(PlaceSearchRequestDto placeSearchRequestDTO , Pageable pageable);
 
 
 
 
 
-    List<PlaceDto> getPlaceBySubRegions(List<SubRegionDto> subRegionDtoList);
+    List<PlaceDto> getPlaceBySigungus(List<SigunguDto> sigunguDtoList);
 
-    List<PlaceDto> getPlaceByRegionName(String keyword);
+    /**
+     *
+     * @param keyword
+     * @return
+     */
+    List<PlaceDto> getPlaceDtoBySidoName(String keyword);
 
     /**
      * 컨트롤러에서 검색어를 넘겨받으면 그 검색어를 바탕으로 시설을 검색합니다.
@@ -113,12 +110,19 @@ public interface PlaceService {
      */
     List<SearchSuggestionDto> getSearchSuggestions(KeywordDto keywordDto);
 
+    /**
+     * 유저의 현재 위치 기반으로 시설(place)를 반환하는 메서드입니다.
+     * @param latitude 유저의 위도입니다. 33.11~37.66
+     * @param longitude 유저의 경도입니다. 124.60~131.87
+     * @return
+     */
+    List<PlaceListDto> getPlaceListDtoListByUserLocation(double latitude, double longitude,Pageable pageable);
 
 
 
 
 
 
-//    List<PlaceListDto> getPlacesByRegionId(Long regionId);
+
 
 }
