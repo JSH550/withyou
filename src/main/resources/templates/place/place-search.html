@@ -13,6 +13,13 @@
 </head>
 
 <body>
+
+
+
+
+
+
+
     <!-- 지역 선택박스 -->
     <div class="container fixed-top d-none fade-in-out bg-white " id="region-container"
         style="z-index: 9999; height:100%;">
@@ -20,7 +27,7 @@
         <!-- 헤더입니다. -->
         <div class="row p-1 m-0 bg-white h-4rem align-center justify-content-between">
             <div class="col-6">지역선택</div>
-            <div class="col-1 close-region">
+            <div class="col-1 close-sido">
                 <svg class="bi bi-x-lg" fill="currentColor" height="16" viewBox="0 0 16 16" width="16"
                     xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -32,7 +39,7 @@
         <!-- 선택한 시도 시군구 읍면동 표시 박스 컨테이너 입니다. -->
         <div class="region-status-container  justify-content-center d-flex row">
 
-            <div class="col-3 region-status-box p-0 m-1 justify-content-center d-flex" id="region-status">
+            <div class="col-3 region-status-box p-0 m-1 justify-content-center d-flex" id="sido-status">
                 시도
             </div>
 
@@ -50,7 +57,7 @@
             </div>
 
 
-            <div class="col-3 region-status-box m-1 justify-content-center d-flex" id="sub-region-status">
+            <div class="col-3 region-status-box m-1 justify-content-center d-flex" id="sigungu-status">
                 <span>
                     시군구
                 </span>
@@ -67,7 +74,7 @@
             </div>
 
 
-            <div class="col-3 region-status-box m-1 justify-content-center d-flex" id="dong-region-status">
+            <div class="col-3 region-status-box m-1 justify-content-center d-flex" id="dong-status">
 
                 <span>읍면동</span>
             </div>
@@ -85,7 +92,7 @@
         </div>
 
 
-        <!-- 하당 고정 네비게이션 입니다. -->
+        <!-- 하단 고정 네비게이션 입니다. -->
         <div class="fixed-bottom row bg-white bottom-button-box w-100 m-0 p-1 justify-content-center h-4rem">
             <!-- 지역 선택 완료 버튼 -->
             <button class="btn btn-primary col-5 m-1" id="region-select-button" type="button">선택완료</button>
@@ -137,7 +144,26 @@
     </div>
 
     <!-- 검색 관련 DOM들 컨테이너 입니다. -->
-    <div class="container d-flex">
+    <div class="container p-0 d-flex " style="z-index: 200;">
+
+        <!-- 지도관련 DOM을 담는 컨테이너입니다. -->
+        <div class="container p-0 fixed-top  fade-in-out bg-white justify-content-center " id="map-container"
+            style="z-index: 100; height:100%;">
+
+            <!-- 지도를 담을 div 박스입니다. -->
+            <div class="" id="map" style="height: 100%; width: 100%;">
+            </div>
+
+
+            <!-- 지도에서 마커 클릭시 클릭된 시설 정보를 표시할 창입니다. -->
+            <div class="w-100 marker-cliked-place p-2 z-minus">
+                정보
+            </div>
+
+        </div>
+
+
+
 
 
         <div class="col">
@@ -182,7 +208,7 @@
 
 
             <!-- 현재 선택한 지역을 보여주는 버튼 입니다. 클릭시 지역선택 화면을 보여줍니다.-->
-            <div class="w-80 region-button mb-1">
+            <div class="w-80 region-button mb-1 bg-white" style="z-index: 200;">
                 <svg class="bi bi-geo-alt-fill" fill="blue" height="16" viewBox="0 0 16 16" width="16"
                     xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6" />
@@ -192,13 +218,29 @@
 
 
             <!-- 검색창입니다. -->
-            <div>
+            <div class="d-flex col-12 mb-3 w-100">
+                <div class="input-group">
+                    <input aria-label="Search" class="form-control" id="search-input" placeholder="검색어를 입력하세요!"
+                        th:name="query" type="search">
+
+                    <button class="btn btn-outline-success search-button" type="submit">
+                        <svg class="bi bi-search" fill="currentColor" height="16" viewBox="0 0 16 16" width="16"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                        </svg>
+                        <span class="visually-hidden">Search</span>
+                    </button>
+                </div>
+            </div>
+            <!-- <div>
                 <form class="d-flex col-12 mb-3 w-100" method="get" th:action="@{/search?}">
                     <div class="input-group">
 
                         <input aria-label="Search" class="form-control" id="search-input" placeholder="검색어를 입력하세요!"
                             th:name="query" type="search">
-                        <button class="btn btn-outline-success" type="submit">
+
+                        <button class="btn btn-outline-success search-button" type="submit">
                             <svg class="bi bi-search" fill="currentColor" height="16" viewBox="0 0 16 16" width="16"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -208,13 +250,13 @@
                         </button>
                     </div>
                 </form>
-            </div>
+            </div> -->
 
             <!-- 추천검색어를 담을 컨테이너입니다. -->
             <div class="suggest-container col-12 bg-white">
                 <!-- 추천 검색어 창 (지역) 입니다. -->
-                <!-- <div class="suggest-region-container col-12  w-100 bg-white">
-                    <div class="suggest-region-box">
+                <!-- <div class="suggest-sido-container col-12  w-100 bg-white">
+                    <div class="suggest-sido-box">
                         <span></span>
                     </div>
                 </div> -->
@@ -238,10 +280,14 @@
 
             </div>
 
+
+
             <!-- 서버에서 비동기방식으로 받은 place 정보를 저장하는 컨테이너 입니다. -->
             <div class="place-information-container m-0 p-0" style="background-color: gainsboro;">
 
             </div>
+
+
 
             <!-- 장소 정보를 보여줄 box 입니다. -->
             <div class="justify-content-between bg-gainsboro  w-100 mt-1" id="place-information-box"
@@ -260,114 +306,599 @@
 
 
 
-            <!-- navbara 보정용 dom입니다. -->
+
+            <!-- 지도 보기 전환 버튼입니다.
+            <div id="map-switching-container" style="z-index: 200;"
+                class="col-12 d-flex justify-content-center fixed-bottom">
+                <div class="map-switching-button ">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="blue" class="bi bi-map"
+                        viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z" />
+                    </svg>
+
+                    <div id="map-switching-text">지도보기</div>
+
+                </div>
+
+            </div> -->
+
+            <!-- 지도 보기 버튼입니다. -->
+            <div class="map-switching-button mb-1 bg-white" id="map-switching-container" style="z-index: 200;">
+
+                <svg class="bi bi-map" fill="blue" height="20" viewBox="0 0 16 16" width="20"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"
+                        fill-rule="evenodd" />
+                </svg>
+                <div class="map-switching-text font-1rem" id="map-switching-text">지도 보기</div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
 
         </div>
-    </div>
-    <div style="height: 5rem;">
 
-    </div>
-    <!-- navbar를 불러옵니다. -->
-    <div th:replace="~{navbar-mobile-btm.html :: navbar}"></div>
+        <!--  -->
+        <div class=" d-none fixed-bottom row bg-white w-100 m-0 p-2 justify-content-between "
+            id="place-summary-container">
 
+        </div>
 
+        <!-- navbara 보정용 dom입니다. -->
 
+        <div class="bg-white" style="height: 5rem;">
 
-
-    <!-- //아래 주석 복사해서 쓰세요 -->
-    <script src="/js/Utils.js"></script>
-
-
-    <script th:inline="javascript">
-        const utils = new Utils();
-
-        const goBackCurrentPage = () => {
-            utils.goBackCurrentPage();
-        }
-        function redirectPage(detailUrl) {
-            utils.redirectPage(detailUrl)
-        }
-
-        const goHomePage = () => {
-            utils.goHomePage();
-        }
-
-        // 현재 페이지 번호를 나타냅니다. 스크롤 이벤트 발생 시 추가 데이터를 서버로부터 받기 위해 사용됩니다.
-        let pageNumber = 0;
-
-        // 스크롤 이벤트를 막기위해 사용되는 변수입니다.
-        // false로 초기화하여 비활성화 합니다.
-        let blockScrollEvent = false;
+        </div>
+        <!-- navbar를 불러옵니다. -->
+        <div th:replace="~{navbar-mobile-btm.html :: navbar}"></div>
 
 
 
-        // 지역정보 검색시 사용될 배열입니다.
-        let selectedRegionData = {
-            id: '',
-            dataType: '',
-            name: '',
-        }
-
-        let selectedCategoryData = {
-            id: '',
-            name: ''
-        }
-
-        //유저가 선택한 카테고리/지역 정보를 저장하는 객체입니다.
-        let userSelectData = {
-            regionId: '',
-            regionName: '',
-            dataType: '',
-            categoryId: '',
-            pageNumber: 0//초기값 0
-
-        }
 
 
-        let dataType = '';
-        let id = 0;
-        let clickedContent = '';
+        <!-- //아래 주석 복사해서 쓰세요 -->
+        <script src="/js/Utils.js"></script>
 
 
-        var goPlaceDetailPage = () => {
-            let placeInfoBoxAll = document.querySelectorAll("#place-information-box")
-            placeInfoBoxAll.forEach(placeInfoBox => {
-                placeInfoBox.addEventListener('click', function () {
-                    const placeDetailUrl = window.location.origin + "/places/";//쿼리파리미터 이전까지의 URL
-                    let placeId = placeInfoBox.dataset.placeId;
+        <script th:inline="javascript">
+            const utils = new Utils();
 
-                    console.log(placeDetailUrl + placeId);
-                    window.location.href = placeDetailUrl + placeId;
+            const goBackCurrentPage = () => {
+                utils.goBackCurrentPage();
+            }
+            function redirectPage(detailUrl) {
+                utils.redirectPage(detailUrl)
+            }
+
+            const goHomePage = () => {
+                utils.goHomePage();
+            }
+
+            const openUrlInNewTab = (detailUrl) => {
+                utils.openUrlInNewTab(detailUrl);
+            }
+
+            // 현재 페이지 번호를 나타냅니다. 스크롤 이벤트 발생 시 추가 데이터를 서버로부터 받기 위해 사용됩니다.
+            let pageNumber = 0;
+
+            // 스크롤 이벤트를 막기위해 사용되는 변수입니다.
+            // false로 초기화하여 비활성화 합니다.
+            let blockScrollEvent = false;
+
+
+
+            // 지역정보 검색시 사용될 배열입니다.
+            let selectedRegionData = {
+                id: '',
+                dataType: '',
+                name: '',
+            }
+
+            // 카테고리 선택에 사용될 배열입니다.
+            let selectedCategoryData = {
+                id: '',
+                name: ''
+            }
+
+            //유저가 선택한 카테고리/지역 정보를 저장하는 객체입니다.
+            let userSearchData = {
+                regionId: '',
+                regionName: '',
+                dataType: '',//지역의 타입 sido,sigungu,dong 중 하나입니다.
+                categoryId: '',
+                pageNumber: 0,//초기값 0
+                searchWord: ''//검색어
+            }
+
+            //서버에서 보낸 시설의 위도 경도를 저장할 배열
+            let markerPositions = [];
+            //마커를 저장할 배열
+            let markers = [];
+
+
+
+            // let dataType = '';
+            // let id = 0;
+            // let clickedContent = '';
+
+
+            var goPlaceDetailPage = () => {
+                let placeInfoBoxAll = document.querySelectorAll("#place-information-box")
+                placeInfoBoxAll.forEach(placeInfoBox => {
+                    placeInfoBox.addEventListener('click', function () {
+                        const placeDetailUrl = window.location.origin + "/places/";//쿼리파리미터 이전까지의 URL
+                        let placeId = placeInfoBox.dataset.placeId;
+
+                        console.log(placeDetailUrl + placeId);
+                        window.location.href = placeDetailUrl + placeId;
+                    })
+                });
+            }
+
+            goPlaceDetailPage();
+
+            let inputTimer;
+            //*************************지도 관련 기능들*************************************
+
+
+
+
+            //map을 담을 div를 찾아옵니다.
+            let mapContainer = document.querySelector('#map');
+            //지도를 옵션을 설정합니다.
+            let options = {
+                center: new kakao.maps.LatLng(36.33313629, 126.612311),//중심좌표설정
+                level: 4//레벨 설정, 크기가 커질수록 축소됩니다.
+            };
+
+            let map = new kakao.maps.Map(mapContainer, options);//지도를 만듭니다.
+
+
+            // //마커의 좌표를 저장하는 배열을 만드는 함수입니다.
+            // let makeMarkerPositions = (data) => {
+            //     console.log("기능진입")
+            //     //배열을 초기화합니다.
+            //     markerPositions = [];
+            //     //서버에서 받은 data를 배열에 추가합니다.
+            //     data.forEach(element => {
+            //         markerPositions.push(new kakao.maps.LatLng(element.latitude, element.longitude));
+            //     });
+            //     // console.log("추가된내용" + markerPositions);
+            // }
+
+
+
+            //서버에서 받은 place의 데이터로 마커를 만드는 함수입니다.
+            let makePlaceMarkers = (placeData) => {
+                console.log("마커표시 기능진입")
+                //지도상의 마커와, 마커를 담는 배열을 초기화합니다.
+                clearMarkers();
+                if (placeData.length > 0) {
+                    for (let i = 0; i < placeData.length; i++) {
+                        let marker = new kakao.maps.Marker({
+                            position: new kakao.maps.LatLng(placeData[i].latitude, placeData[i].longitude),
+                            clickable: true, // 마커를 클릭했을 때 지도의 클릭 이벤트가 발생하지 않도록 설정합니다
+                            title: placeData[i].placeId//시설의 id값을 마커 타이틀에 저장합니다.
+                        })
+
+                        //생성된 마커를 배열에 마커를 추가 합니다.
+                        markers.push(marker);
+
+                        // 마커에 표시할 인포윈도우를 생성합니다 
+                        var infowindow = new kakao.maps.InfoWindow({
+                            content: '안녕하세요' // 인포윈도우에 표시할 내용
+                        });
+
+                        //생성된 마커에 이벤트리스너를 추가합니다.
+                        kakao.maps.event.addListener(marker, 'click', () => {
+                            console.log("마커클릭감지 마커 title =" + marker.getTitle());
+                            const title = marker.getTitle();
+                            showPlaceDetails(title);
+                        });
+
+
+
+
+                    }
+                    //배열을 돌며 지도에 마커를 만듭니다.
+                    setMarkers();
+                    //첫번째 좌표로 지도를 이동시킵니다.
+                    map.setCenter(new kakao.maps.LatLng(placeData[0].latitude, placeData[0].longitude));
+
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+            //배열에 추가된 마커들을 지도에 표시하는 함수입니다.
+            const setMarkers = () => {
+                //배열돌면서 표시해주셈
+                for (let i = 0; i < markers.length; i++) {
+                    markers[i].setMap(map)
+
+                }
+            }
+
+            //배열에 추가된 마커들을 초기화하고 지도에서 삭제하는 함수입니다.
+            const clearMarkers = () => {
+                console.log("마커삭제기능 돌입")
+                for (let i = 0; i < markers.length; i++) {
+                    markers[i].setMap(null)
+                }
+
+                //마커들이 저장되어있던 배열을 초기화합니다.
+                markers = [];
+                console.log("마커 배열 =" + markers);
+            }
+
+
+
+
+
+            //마커를 클릭했을때 나오는 시설 정보 클릭시 상세페이지로 이동시키는 기능입니다.
+            document.querySelector(".marker-cliked-place").addEventListener('click', (event) => {
+                const clickedBoxContainer = document.querySelector(".marker-cliked-place");
+
+
+                const childDom = clickedBoxContainer.firstElementChild;
+
+                console.log("childDom=" + childDom);
+                //상세페이지로 이동할 URL을 만듭니다.
+                const detailUrl = `places/${childDom.dataset.placeId}`
+
+                console.log("URL =" + detailUrl);
+
+                //클릭한요소 상세페이지로 이동합니다.
+                openUrlInNewTab(detailUrl);
+
+
+            })
+
+            //지도위 마커를 클릭했을때, 클릭한 시설의 상세정보를 하단에 표시하는 기능입니다.
+            const showPlaceDetails = (title) => {
+                // const clickedPlaceDom = document.querySelector(`[data-place-id="${title}"]`);
+                const clickedPlaceDom = document.querySelector(`[data-place-id="${title}"]`).cloneNode(true);
+
+                const mapSwitchingButton = document.querySelector("#map-switching-container");
+
+                //지도보기/목록보기 버튼 위치를 조정합니다.
+                mapSwitchingButton.classList.add("top-76");
+
+                const clickedBoxContainer = document.querySelector(".marker-cliked-place");
+                //내부 HTML DOM을 초기화합니다.
+                clickedBoxContainer.textContent = "";
+
+                //zindex를 조정합니다.
+                clickedBoxContainer.classList.add("z-101");
+                clickedBoxContainer.classList.remove("z-minus");
+
+                console.log("클릭된 마커의 시설정보 = " + clickedPlaceDom.innerHTML);
+
+                clickedBoxContainer.appendChild(clickedPlaceDom);
+
+            }
+
+
+            //지도 열기 버튼 클릭시 이벤트 처리
+            document.querySelector("#map-switching-container").addEventListener("click", function (event) {
+                // 지도가 열려있을경우 처리
+                if (event.target.classList.contains('map-open')) {
+                    const mapContainer = document.querySelector("#map-container")
+
+                    setTimeout(() => {
+                        mapContainer.classList.add("hidden");
+                        mapContainer.classList.remove("visible");
+                        event.target.classList.remove("map-open");//닫기기능 활성화하기위한 class를 제거합니다.
+
+                    }, 100);
+
+
+                    const text = document.querySelector("#map-switching-text");
+                    text.textContent = "지도보기"
+
+                    //버튼을 객체에 저장합니다.
+                    const mapSwitchingButton = document.querySelector("#map-switching-container");
+
+                    //지도보기/목록보기 버튼 위치를 조정합니다.
+                    mapSwitchingButton.classList.remove("top-76");
+
+
+
+                    //지도가 닫혀있을경우 처리
+                } else {
+                    const mapContainer = document.querySelector("#map-container")
+                    mapContainer.classList.remove("d-none")
+                    setTimeout(() => {
+                        mapContainer.classList.remove("hidden");
+                        mapContainer.classList.add("visible");
+                        event.target.classList.add("map-open");//닫기기능 활성화하기위한 class입니다.
+
+                    }, 100);
+
+                    const text = document.querySelector("#map-switching-text");
+                    text.textContent = "목록보기"
+
+
+
+
+                }
+
+
+            })
+
+
+
+
+            //*************추천검색어 관련 기능들 ************************
+
+            document.querySelector("#search-input").addEventListener("input", function () {
+                clearTimeout(inputTimer);
+                inputTimer = setTimeout(function () {
+                    // fetchKeyword()
+                }, 1000);//2초후 함수를 호출합니다.
+            })
+
+
+            //유저가 검색창에 입력한 값을 토대로 서버에서 추천검색어를 받아옵니다.
+
+            function fetchKeyword() {
+                let userInput = document.querySelector('#search-input').value;
+                console.log("유저가 검색한 값=" + userInput);
+                let postData = {};
+
+                if (userInput !== null && userInput.trim() !== '') {
+
+                    postData['keyword'] = userInput;
+
+                    fetch('http://localhost:8080/search/suggest', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(postData)
+                    })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('통신 에러 발생')
+                            }
+                            else {
+                                // console.log("응답",response)
+                                // console.log("응답 json",response.json())
+                                return response.json();
+                            }
+                        })
+                        .then(data => {
+                            console.log(data);
+                            makeSuggestionBox(data);//추천 검색어 박스를 만듭니다.
+                        })
+                        .catch(error => {
+                            alert('추천검색어 에러 발생' + error);
+                        })
+                }
+
+            }
+
+            /**
+             * 추천 검색어 제안 박스를 만드는 함수입니다.
+             * 비동기 방식으로 웹서버로부터 데이터를 가져와 박스를 만듭니다. 
+             * 
+            */
+            const makeSuggestionBox = (resultData) => {
+                // console.log('제안 박스 만들기 진입')
+
+                //추천 검색어 박스를 담을 컨테이너입니다.
+                let suggestContainer = document.querySelector('.suggest-container');
+                //시도(sido) 시군구(sigungu) 추천 검색어 저장 컨테이너입니다.
+                // let regionContainer = document.querySelector('.suggest-sido-container');
+                //시설(place) 시군구(sigungu) 추천 검색어 저장 컨테이너입니다.
+                // let placeContainer = document.querySelector('.suggest-place-container');
+
+                //display-none 상태 해제 추천검색어 클릭시 dispaly-none으로 바뀝니다.
+                suggestContainer.classList.remove("d-none")
+
+                //서버로부터 받은 시도(sido) 시군구(sigungu) 데이터 저장 객체
+                let regionBox = [];
+                // let regionBoxHTML = ''; // 문자열로 초기화
+
+                //서버로부터 받은 시설(place) 데이터 저장 객체
+                let placeBox = [];
+                // let placeBoxHTML = ''; // 문자열로 초기화
+
+                let suggestInnerHtml = ''; // 문자열로 초기화
+
+
+
+
+                //서버에서 받은 데이터 타입이 시도(sido) 시군구(sigungu)인 데이터들 객체에 저장
+                for (let i = 0; i < resultData.length; i++) {
+                    if (resultData[i]['dataType'] == "sido" || resultData[i]['dataType'] == "sigungu") {
+                        regionBox.push(resultData[i]);
+                    }
+                }
+                //시도(sido) 시군구(sigungu) 추천검색어 박스를 생성하여 객체에 저장.
+                for (let i = 0; i < regionBox.length; i++) {
+                    console.log("출력할 데이터=", regionBox[i])
+                    suggestInnerHtml +=
+                        `<div class="suggest-sido-box suggest mt-2" data-id = ${regionBox[i]['id']} data-type =${regionBox[i]['dataType']}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+                    <span>${regionBox[i]['name']}</span>
+                </div>`
+                };
+
+
+                //서버에서 받은 데이터 타입이 시설(place) 인 데이터들 객체에 저장
+                for (let i = 0; i < resultData.length; i++) {
+                    if (resultData[i]['dataType'] == "place") {
+                        placeBox.push(resultData[i]);
+                    }
+                }
+
+                // 시설(place)  추천검색어 박스를 생성하여 객체에 저장.
+                for (let i = 0; i < placeBox.length; i++) {
+                    // console.log("출력할 데이터=", placeBox[i])
+                    suggestInnerHtml +=
+                        `<div class="suggest-place-box mt-2 suggest" data-id = ${placeBox[i]['id']} data-type =${placeBox[i]['dataType']}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="blue" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
+                </svg>
+                <span>${placeBox[i]['name']}</span>
+                </div>`
+                };
+
+
+                //추천 검색어 컨테이너에 추천검색어 DOM 추가
+                suggestContainer.innerHTML = suggestInnerHtml;
+
+
+                // suggestContainer.innerHTML = placeBoxHTML;
+                // regionContainer.innerHTML = regionBoxHTML;
+                // placeContainer.innerHTML = placeBoxHTML;
+
+                //만들어진 지역 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
+                let regionSuggestBoxes = document.querySelectorAll(".suggest-sido-box")
+
+                //만들어진 place 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
+                let placeSuggestBoxes = document.querySelectorAll(".suggest-place-box")
+
+                //만들어진 box들에 이벤트리스너를 붙입니다.
+                regionSuggestBoxes.forEach(suggestBox => {
+                    /**
+                     * 1. 유저가 클릭한 추천 검색어를 검색창으로 옮기고
+                     * 2. 비동기 방식으로 서버로부터 place 정보를 받아와 렌더링합니다.
+                     * 3. 추천 검색어 창을 dispaly : none으로 숨깁니다.
+                    */
+                    suggestBox.addEventListener('click', () => handleRegionSuggestBoxClick(suggestBox))
                 })
-            });
-        }
 
-        goPlaceDetailPage();
+                placeSuggestBoxes.forEach(suggestBox => {
+                    suggestBox.addEventListener('click', () => handlePlaceSuggestClick(suggestBox))
 
-        let inputTimer;
+                });
 
-        //*************추천검색어 관련 기능들 ************************
-
-        document.querySelector("#search-input").addEventListener("input", function () {
-            clearTimeout(inputTimer);
-            inputTimer = setTimeout(function () {
-                fetchKeyword()
-            }, 1000);//2초후 함수를 호출합니다.
-        })
+            }
 
 
-        //유저가 검색창에 입력한 값을 토대로 서버에서 추천검색어를 받아옵니다.
 
-        function fetchKeyword() {
-            let userInput = document.querySelector('#search-input').value;
-            console.log("유저가 검색한 값=" + userInput);
-            let postData = {};
+            // 추천 검색어 클릭 이벤트를 처리하는 함수 입니다.
+            // 파라미터는 클릭한 추천 검색어 div 박스입니다.
+            const handleRegionSuggestBoxClick = (suggestBox) => {
 
-            if (userInput !== null && userInput.trim() !== '') {
+                //추천검색어 DOM 전체를 포함하는 컨테이너입니다. 숨깁니다.
+                let suggestContainer = document.querySelector('.suggest-container');
+                suggestContainer.classList.add("d-none");//유저가 추천검색어를 클릭하면 추천검색어 창을 숨깁니다.
 
-                postData['keyword'] = userInput;
+                let keyword;
+                dataType = suggestBox.dataset.type;//클릭한 데이터의 type(sido, sigungu 등)을 저장합니다.
+                id = suggestBox.dataset.id;//클릭한 데이터의 id값을 저장합니다
+                clickedContent = suggestBox.querySelector("span").textContent;//클릭한 데이터의 이름값을 저장합니다.
 
-                fetch('http://localhost:8080/search/suggest', {
+
+                //검색창 내용(value)를 클릭한 박스의 내용으로 바꿉니다.
+                document.querySelector('#search-input').value = clickedContent;
+
+                //클릭한 추천검색어로 서버에서 검색 결과를 받아옵니다.
+
+                //place 정보를 box에 담아 DOM으로 나타냅니다
+                handleSearchRequest(id, dataType, clickedContent);
+
+            }
+
+            const handlePlaceSuggestClick = (suggestBox) => {
+                console.log("place 박스 클릭감지");
+                const placeId = suggestBox.dataset.id;
+                redirectPage(`places/${placeId}`);
+            }
+
+
+
+            /**
+             * 스크롤을 끝까지 내리면 place 정보를 더 받아오는 함수입니다.
+             */
+            const handelScrollEndToAddPlaceBox = () => {
+
+                //현재 스크롤 위치
+                let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                //화면의 높이
+                let windowHeight = window.innerHeight;
+
+                //문서 전체의 높이
+                let documentHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+                if (scrollTop + windowHeight >= documentHeight) {
+                    console.log("pageNumber=" + pageNumber);
+                    console.log("스크롤 이벤트 시작")
+
+
+                    //API 호출을 위한 정보들입니다.
+                    // let suggestId = id;//PK입니다.
+                    // let suggestDataType = dataType;//데이터 타입(테이블명) 입니다.
+                    // let suggestConent = clickedContent;
+
+
+                    showLoadingScreen();//로딩 스크린을 출력합니다. 1초뒤 사라집니다.
+
+                    //
+                    // handleSearchRequest(suggestId, suggestDataType, suggestConent);
+
+
+                    // 유저가 선택한 정보를 바탕으로 place 정보를 받아옵니다.
+                    pageNumber++;//페이지 번호를 1 증가시킵니다.
+                    fetchUserSearchData();
+
+
+                    window.scrollTo(0, scrollTop);
+
+                    // console.log("스크롤 관련 정보" +"scrollTop="+ scrollTop+"windowHegith" +windowHeight +"documentHegith" +documentHeight);
+
+                    // 여기에 실행할 함수 호출
+                }
+            }
+
+            // 스크롤 이벤트 리스너
+            window.addEventListener('scroll', () => {
+                // console.log("스크롤")
+                if (!blockScrollEvent) {
+                    handelScrollEndToAddPlaceBox();
+                }
+            }
+            );
+
+
+            /**
+             * 추천 검색어를 눌렀을때 검색 결과를 핸들링하는 함수입니다.
+             * @param id
+             * @param dataType
+             * @param clickedContent
+             */
+            const handleSearchRequest = (id, dataType, clickedContent) => {
+                let postData = {}; //비동기 방식으로 POST요청을 보내기 위한 배열입니다.
+                postData['id'] = id;//추천 검색어의 DB table에서의 FK입니다.
+                postData['dataType'] = dataType;//추천검색어 검색 타입입니다.
+                postData['name'] = clickedContent;//추천검색어에 저장되어있던 객체의 이름입니다. 예시: 경기도
+                postData['pageNumber'] = pageNumber;//페이지 번호 입니다(전역변수).
+
+
+                fetch('http://localhost:8080/search', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -376,281 +907,635 @@
                 })
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error('통신 에러 발생')
+                            throw new Error("서버 에러 발생");
+                        } else {
+                            return response.json();//서버에서 받아온 데이터를 JSON으로 변환합니다.
                         }
-                        else {
-                            // console.log("응답",response)
-                            // console.log("응답 json",response.json())
-                            return response.json();
+                    }).then(data => {
+                        console.log("서버에서 받아온 데이터 수=" + data.length);
+                        //데이터 수가 20개 미만이면 스크롤 이벤트를 차단합니다.(마지막 페이지)
+                        if (data.length < 20) {
+                            blockScrollEvent = true;
                         }
-                    })
-                    .then(data => {
-                        console.log(data);
-                        makeSuggestionBox(data);//추천 검색어 박스를 만듭니다.
-                    })
-                    .catch(error => {
-                        alert('에러 발생' + error);
+
+                        // HTML에서 클래스가 "place-information-container"인 요소를 선택합니다.
+                        let container = document.querySelector('.place-information-container');
+                        // 
+                        let listBoxes = '';
+                        data.forEach(element => {
+                            // 서버에서 받아온 데이터를 사용하여 리스트 아이템의 HTML을 생성하고 listBoxes에 추가합니다.
+                            listBoxes = addPlaceListBox(element, listBoxes);
+                        });
+                        // 현재 컨테이너의 내부 HTML을 저장합니다.
+                        let containerInnerHtml = container.innerHTML;
+                        // 이전 HTML 내용과 새로 생성된 listBoxes를 합쳐서 컨테이너의 내부 HTML을 갱신합니다.
+                        container.innerHTML = containerInnerHtml + listBoxes;
+                        showPlaceDetail();
+                    }).catch(error => {
+                        alert('에러 발생 함수' + error);
                     })
             }
-
-        }
-
-        /**
-         * 추천 검색어 제안 박스를 만드는 함수입니다.
-         * 비동기 방식으로 웹서버로부터 데이터를 가져와 박스를 만듭니다. 
-         * 
-        */
-        const makeSuggestionBox = (resultData) => {
-            // console.log('제안 박스 만들기 진입')
-
-            //추천 검색어 박스를 담을 컨테이너입니다.
-            let suggestContainer = document.querySelector('.suggest-container');
-            //시도(region) 시군구(subRegion) 추천 검색어 저장 컨테이너입니다.
-            // let regionContainer = document.querySelector('.suggest-region-container');
-            //시설(place) 시군구(subRegion) 추천 검색어 저장 컨테이너입니다.
-            // let placeContainer = document.querySelector('.suggest-place-container');
-
-            //display-none 상태 해제 추천검색어 클릭시 dispaly-none으로 바뀝니다.
-            suggestContainer.classList.remove("d-none")
-
-            //서버로부터 받은 시도(region) 시군구(subRegion) 데이터 저장 객체
-            let regionBox = [];
-            // let regionBoxHTML = ''; // 문자열로 초기화
-
-            //서버로부터 받은 시설(place) 데이터 저장 객체
-            let placeBox = [];
-            // let placeBoxHTML = ''; // 문자열로 초기화
-
-            let suggestInnerHtml = ''; // 문자열로 초기화
+            // }
 
 
 
 
-            //서버에서 받은 데이터 타입이 시도(region) 시군구(subRegion)인 데이터들 객체에 저장
-            for (let i = 0; i < resultData.length; i++) {
-                if (resultData[i]['dataType'] == "region" || resultData[i]['dataType'] == "subRegion") {
-                    regionBox.push(resultData[i]);
+
+
+
+            /**
+             * 서버로부터 받아온 data로 place 정보를 list 형태로 만드는 함수입니다.
+             * @param {data} place 서버로부터 받아온 data입니다.
+             * @param listBoxes placeList를 저장할 DOM입니다.
+             * @returns placeList를 담은 DOM을 반환합니다.
+             */
+            function addPlaceListBox(place, listBoxes) {
+                listBoxes +=
+                    `<div class="justify-content-between bg-white w-100 place-list-box" style="margin-top: 1px;" id="place-information-box"
+                     data-place-id = ${place.placeId} >
+                     <div class="w-100" id="place-text-box">
+                     <div class="p-1 text-muted"><span class="small">${place.categoryName}</span>
+                      </div>
+                         <div class="p-1"><span class="h6" ">${place.placeName}</span></div>
+                       <div class="p-1 text-muted"><span class="small"">${place.placeRoadAddress}</span>
+                         </div>
+                     </div>
+                     <div id="place-img-box">
+                             </div>
+                      </div>`
+                return listBoxes;
+
+            }
+
+            /*********************시설(place) 핸들링 관련 기능들*********
+    
+    
+    
+    
+            /**
+             * 로딩화면을 보여주는 함수입니다. 1초뒤 로딩화면이 사라집니다.
+             */
+            const showLoadingScreen = () => {
+                // console.log("변경진입");
+                const loadingScreen = document.querySelector('.overlay')//로딩화면 객체에 저장.
+                loadingScreen.classList.remove('d-none');//부트스트랩 display-none 클래스 제거
+                loadingScreen.classList.add('d-block');//부트스트랩 display-block 클래스 추가
+                loadingScreen.addEventListener('click', function (event) {
+                })
+                //1초뒤 로딩화면을 숨깁니다.
+                setTimeout(function () {
+                    document.body.style.overflow = '';
+                    loadingScreen.classList.remove('d-block');
+                    loadingScreen.classList.add('d-none');
+                }, 1000)
+
+            }
+
+
+
+
+            // const categoryBoxes = document.querySelectorAll(".category-box");
+            // categoryBoxes.forEach(categoryBox => {
+            //     categoryBox.addEventListener('click', function () {
+            //         const categoryId = categoryBox.dataset.categoryId;
+            //         console.log("카테고리 박스 클릭 감지" + categoryId);
+            //         categoryBox.style.color = "#4a74fc"; // 글씨색 변경
+            //         categoryBox.style.borderColor = "#4a74fc"; // 테두리 색상 변경
+            //         categoryBox.style.fontWeight = "bold"; // 글씨 굵게 변경
+            //         categoryBoxes.forEach(box => {
+            //             if (box !== categoryBox) {
+            //                 box.style.color = ""; // 글씨색 초기화
+            //                 box.style.borderColor = ""; // 테두리 색상 초기화
+            //                 box.style.fontWeight = ""; // 글씨 굵기 초기화
+            //             }
+            //         }
+
+            //         )
+            //     }
+            //     )
+            // }
+
+            // );
+
+
+            //**************************지역 선택 관련 함수들 ****************
+
+            //비동기 방식으로 POST요청을 보내기 위한 함수입니다.
+            function fetchRegionList(id, dataType, name) {
+
+                let postData = {
+                    id: id,
+                    dataType: dataType,
+                    name: name
+                };
+                fetch("http://localhost:8080/regions/list", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('통신 에러 발생')
+                    }
+                    else {
+                        return response.json();
+                    }
+                }).then(data => {
+                    makeRegionListBoxes(data);
+                }).catch(error => {
+
+                })
+            }
+
+            // 지역 박스를 만드는 함수입니다. 유저가 선택한 지역의 하위 지역들을 박스로 만듭니다.
+            const makeRegionListBoxes = (data) => {
+                console.log("지역 박스 만들기 기능진입")
+                //지역 정보 list를 담는 컨테이너를 불러옵니다.
+                const regionListContainer = document.querySelector(".region-list-container")
+                //innerHTML을 초기화합니다.
+                regionListContainer.innerHTML = '';
+                //innerHTML에 넣을 객체입니다.
+                regionListInnerHtml = '';
+
+                // 박스를 생성하여 객체에 저장.
+                for (let i = 0; i < data.length; i++) {
+                    // console.log("출력할 데이터=", data[i].id)
+                    // console.log("출력할 타입=", data[i].dataType)
+
+                    regionListInnerHtml +=
+                        ` <div class="col-4 region-list-box d-flex justify-content-center" data-id="${data[i].id}" data-datatype="${data[i].dataType}">
+   ${data[i].name}
+      </div>`
+                };
+
+                //만들어진 박스를 컨테이너에  담습니다.
+                regionListContainer.innerHTML = regionListInnerHtml;
+            }
+
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log("DOM 로딩 완료")
+                fetchRegionList();
+            });
+
+
+            // 시도 클릭 이벤트 위임
+            document.addEventListener('click', function (event) {
+
+                // console.log(event.target.classList)
+                if (event.target.classList.contains('region-list-box')) {
+
+                    const id = event.target.dataset.id;
+                    const dataType = event.target.dataset.datatype;
+
+
+                    const name = event.target.textContent;
+                    console.log(`클릭한요소 =  id:${id}, name:${name}, dataType:${dataType}`);
+
+                    //상단의 시도 시군구 읍면동 정보창을 동기화합니다.
+                    changeStatusBox(id, dataType, name);
+
+                    //클릭한 데이터가 시도(sido) 또는 시군구(sigungu)일때만 매핑된 자료를 요청합니다.
+                    if (dataType == "sido" || dataType == "sigungu") {
+                        fetchRegionList(id, dataType, name);
+                    }
+
                 }
-            }
-            //시도(region) 시군구(subRegion) 추천검색어 박스를 생성하여 객체에 저장.
-            for (let i = 0; i < regionBox.length; i++) {
-                console.log("출력할 데이터=", regionBox[i])
-                suggestInnerHtml +=
-                    `<div class="suggest-region-box suggest mt-2" data-id = ${regionBox[i]['id']} data-type =${regionBox[i]['dataType']}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                </svg>
-                    <span>${regionBox[i]['name']}</span>
-                </div>`
-            };
+
+                // 카테고리 선택시 핸들링
+                if (event.target.classList.contains('category-list-box')) {
+                    console.log("카테고리 박스 클릭 감지")
+
+                    let boxes = document.querySelectorAll('.category-list-box')
+                    boxes.forEach(element => {
+                        element.classList.remove("clicked-box")
+
+                    });
+
+                    changeClickedBoxColor(event.target)
 
 
-            //서버에서 받은 데이터 타입이 시설(place) 인 데이터들 객체에 저장
-            for (let i = 0; i < resultData.length; i++) {
-                if (resultData[i]['dataType'] == "place") {
-                    placeBox.push(resultData[i]);
+
+                    const id = event.target.dataset.id;
+                    const name = event.target.textContent;
+                    console.log(`클릭한 카테고리 요쇼 =  id:${id}, name:${name}`);
+
+
+
+                    selectedCategoryData["id"] = id;
+                    selectedCategoryData["name"] = name;
                 }
-            }
-
-            // 시설(place)  추천검색어 박스를 생성하여 객체에 저장.
-            for (let i = 0; i < placeBox.length; i++) {
-                // console.log("출력할 데이터=", placeBox[i])
-                suggestInnerHtml +=
-                    `<div class="suggest-place-box mt-2 suggest" data-id = ${placeBox[i]['id']} data-type =${placeBox[i]['dataType']}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="blue" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
-                <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10m0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6"/>
-                </svg>
-                <span>${placeBox[i]['name']}</span>
-                </div>`
-            };
 
 
-            //추천 검색어 컨테이너에 추천검색어 DOM 추가
-            suggestContainer.innerHTML = suggestInnerHtml;
 
 
-            // suggestContainer.innerHTML = placeBoxHTML;
-            // regionContainer.innerHTML = regionBoxHTML;
-            // placeContainer.innerHTML = placeBoxHTML;
 
-            //만들어진 지역 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
-            let regionSuggestBoxes = document.querySelectorAll(".suggest-region-box")
 
-            //만들어진 place 추천 검색어 box들을 쿼리셀렉터로 찾습니다.
-            let placeSuggestBoxes = document.querySelectorAll(".suggest-place-box")
-
-            //만들어진 box들에 이벤트리스너를 붙입니다.
-            regionSuggestBoxes.forEach(suggestBox => {
-                /**
-                 * 1. 유저가 클릭한 추천 검색어를 검색창으로 옮기고
-                 * 2. 비동기 방식으로 서버로부터 place 정보를 받아와 렌더링합니다.
-                 * 3. 추천 검색어 창을 dispaly : none으로 숨깁니다.
-                */
-                suggestBox.addEventListener('click', () => handleRegionSuggestBoxClick(suggestBox))
-            })
-
-            placeSuggestBoxes.forEach(suggestBox => {
-                suggestBox.addEventListener('click', () => handlePlaceSuggestClick(suggestBox))
 
             });
 
-        }
 
-
-
-        // 추천 검색어 클릭 이벤트를 처리하는 함수 입니다.
-        // 파라미터는 클릭한 추천 검색어 div 박스입니다.
-        const handleRegionSuggestBoxClick = (suggestBox) => {
-
-            //추천검색어 DOM 전체를 포함하는 컨테이너입니다. 숨깁니다.
-            let suggestContainer = document.querySelector('.suggest-container');
-            suggestContainer.classList.add("d-none");//유저가 추천검색어를 클릭하면 추천검색어 창을 숨깁니다.
-
-            let keyword;
-            dataType = suggestBox.dataset.type;//클릭한 데이터의 type(region, subRegion 등)을 저장합니다.
-            id = suggestBox.dataset.id;//클릭한 데이터의 id값을 저장합니다
-            clickedContent = suggestBox.querySelector("span").textContent;//클릭한 데이터의 이름값을 저장합니다.
-
-
-            //검색창 내용(value)를 클릭한 박스의 내용으로 바꿉니다.
-            document.querySelector('#search-input').value = clickedContent;
-
-            //클릭한 추천검색어로 서버에서 검색 결과를 받아옵니다.
-
-            //place 정보를 box에 담아 DOM으로 나타냅니다
-            handleSearchRequest(id, dataType, clickedContent);
-
-        }
-
-        const handlePlaceSuggestClick = (suggestBox) => {
-            console.log("place 박스 클릭감지");
-            const placeId = suggestBox.dataset.id;
-            redirectPage(`places/${placeId}`);
-        }
-
-
-
-        /**
-         * 스크롤을 끝까지 내리면 place 정보를 더 받아오는 함수입니다.
-         */
-        const handelScrollEndToAddPlaceBox = () => {
-
-            //현재 스크롤 위치
-            let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            //화면의 높이
-            let windowHeight = window.innerHeight;
-
-            //문서 전체의 높이
-            let documentHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
-            if (scrollTop + windowHeight >= documentHeight) {
-                console.log("pageNumber=" + pageNumber);
-                console.log("스크롤 이벤트 시작")
-
-
-                //API 호출을 위한 정보들입니다.
-                let suggestId = id;//PK입니다.
-                let suggestDataType = dataType;//데이터 타입(테이블명) 입니다.
-                let suggestConent = clickedContent;
-
-
-                showLoadingScreen();//로딩 스크린을 출력합니다. 1초뒤 사라집니다.
-
-                //
-                // handleSearchRequest(suggestId, suggestDataType, suggestConent);
-
-
-                // 유저가 선택한 정보를 바탕으로 place 정보를 받아옵니다.
-                pageNumber++;//페이지 번호를 1 증가시킵니다.
-                fetchUserSelectData();
-
-
-                window.scrollTo(0, scrollTop);
-
-                // console.log("스크롤 관련 정보" +"scrollTop="+ scrollTop+"windowHegith" +windowHeight +"documentHegith" +documentHeight);
-
-                // 여기에 실행할 함수 호출
-            }
-        }
-
-        // 스크롤 이벤트 리스너
-        window.addEventListener('scroll', () => {
-            if (!blockScrollEvent) {
-                handelScrollEndToAddPlaceBox();
-            }
-        }
-        );
-
-
-        /**
-         * 추천 검색어를 눌렀을때 검색 결과를 핸들링한는 함수입니다.
-         * @param id
-         * @param dataType
-         * @param clickedContent
-         */
-        const handleSearchRequest = (id, dataType, clickedContent) => {
-            let postData = {}; //비동기 방식으로 POST요청을 보내기 위한 배열입니다.
-            postData['id'] = id;//추천 검색어의 DB table에서의 FK입니다.
-            postData['dataType'] = dataType;//추천검색어 검색 타입입니다.
-            postData['name'] = clickedContent;//추천검색어에 저장되어있던 객체의 이름입니다. 예시: 경기도
-            postData['pageNumber'] = pageNumber;//페이지 번호 입니다(전역변수).
-
-
-            fetch('http://localhost:8080/search', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(postData)
+            //시도 status 박스 클릭시 처리
+            //시도 리스트를 서버로부터 받아와 출력합니다.
+            document.querySelector("#sido-status").addEventListener('click', function () {
+                console.log("시도 박스 클릭")
+                fetchRegionList();
             })
-                .then(response => {
+
+
+            // 클릭된 박스의 색을 바꾸는 함수입니다.
+            const changeClickedBoxColor = (clickedBox) => {
+
+                clickedBox.classList.add("clicked-box")
+
+
+
+            }
+
+
+
+            document.querySelector("#sigungu-status").addEventListener("click", function () {
+                console.log("시군구 박스 클릭")
+                const regionStatus = document.querySelector("#sido-status")
+
+                const regionId = regionStatus.dataset.id;
+                const dataType = "sido"
+                fetchRegionList(regionId, dataType);
+
+
+            })
+
+            //지역 status 창(상단 3개 박스) 내용을 바꾸는 함수입니다.
+            const changeStatusBox = (id, dataType, name) => {
+                const regionStatus = document.querySelector("#sido-status")
+                const sigunguStatus = document.querySelector("#sigungu-status")
+                const dongStatus = document.querySelector("#dong-status")
+
+                if (dataType == "sido") {
+                    regionStatus.textContent = name;
+                    regionStatus.dataset.id = id;
+                    regionStatus.dataset.dataType = dataType;
+                    //시군구 읍면동 div 내용 초기화
+                    clearRegionContent(sigunguStatus, "시군구")
+                    clearRegionContent(dongStatus, "읍면동")
+                }
+                if (dataType == "sigungu") {
+                    sigunguStatus.textContent = name;
+                    sigunguStatus.dataset.id = id;
+                    sigunguStatus.dataset.dataType = dataType;
+                    //읍면동 div 내용 초기화
+                    clearRegionContent(dongStatus, "읍면동")
+
+                }
+                if (dataType == "dong") {
+                    dongStatus.textContent = name;
+                    dongStatus.dataset.id = id;
+                    dongStatus.dataset.dataType = dataType;
+                }
+
+            }
+
+            // 지역 선택창 상단의 유저가 선택한 지역 초기화 함수입니다.
+            const clearRegionContent = (regionElement, name) => {
+                //id 초기화
+                delete regionElement.dataset.id;
+                //dataType 초기화
+                delete regionElement.dataset.dataType
+                //텍스트 초기화
+                regionElement.textContent = name;
+            }
+
+
+            // 지역 선택창 닫기버튼 핸들링 함수
+            document.querySelector(".close-sido").addEventListener('click', function () {
+                console.log("닫기버튼 클릭");
+                const regionContainer = document.querySelector("#region-container");
+                regionContainer.classList.add("hidden");
+                regionContainer.classList.remove("visible");
+
+                setTimeout(function () {
+                    regionContainer.classList.add('d-none');
+                }, 500); // 100밀리초(0.1초) 후에 실행
+
+            })
+
+            // 지역 선택창 열기버튼 핸들링 함수
+            document.querySelector(".region-button").addEventListener('click', function () {
+                const regionContainer = document.querySelector("#region-container");
+                regionContainer.classList.remove("d-none");
+
+                setTimeout(() => {
+                    regionContainer.classList.remove("hidden");
+                    regionContainer.classList.add("visible");
+                })
+
+            }, 100);
+
+
+            /**
+             * 선택 완료 버튼을 클릭시 작동합니다.
+             * 유저가 선택한 지역 정보를 객체에 내용을 저장하고 지역 선택 버튼에 내용을 반영하는 함수입니다.
+             */
+            document.querySelector("#region-select-button").addEventListener('click', function () {
+                const regionStatus = document.querySelector("#sido-status");
+                const sigunguStatus = document.querySelector("#sigungu-status");
+                const dongStatus = document.querySelector("#dong-status");
+
+                const regionId = regionStatus.dataset.id;
+                const sigunguId = sigunguStatus.dataset.id;
+                const dongId = dongStatus.dataset.id;
+
+                //지역 선택 버튼 텍스트 입니다. 현재 유저가 선택한 지역을 시도/시군구/읍면동 순서로 보여줍니다.
+                let regionButtonText = document.querySelector(".region-button-text");
+                //내용을 초기화합니다.
+                regionButtonText.textContent = '';
+
+
+
+                // 시도 데이터는 필수 선택사항입니다. 선택하지 않으면 경고창을 띄웁니다.
+                if (regionId == undefined) {
+                    alert("시/도 지역을 선택해 주세요!")
+                }
+
+                //시도는 선택, 시군구는 선택하지 않았을때 처리
+                if (regionId != undefined && sigunguId == undefined) {
+                    selectedRegionData["id"] = regionId
+                    selectedRegionData["name"] = regionStatus.textContent;
+                    selectedRegionData["dataType"] = regionStatus.dataset.dataType;
+                    //지역 선택 창 열기 버튼에 시도 이름 입력
+                    regionButtonText.textContent = `${regionStatus.textContent}`
+
+                    //시도는 시군구는 선택, 읍면동은 선택하지 않았을때 처리
+                } else if (sigunguId != undefined && dongId == undefined) {
+                    selectedRegionData["id"] = sigunguId
+                    selectedRegionData["name"] = sigunguStatus.textContent;
+                    selectedRegionData["dataType"] = sigunguStatus.dataset.dataType;
+
+                    //지역 선택 창 열기 버튼에  시도 시군구 이름 입력
+                    regionButtonText.textContent = `${regionStatus.textContent} ${sigunguStatus.textContent}`
+
+                    //시도는 시군구 읍면동 선택했을때 처리
+
+                } else if (dongId != undefined) {
+                    selectedRegionData["id"] = dongId
+                    selectedRegionData["name"] = dongStatus.textContent;
+                    selectedRegionData["dataType"] = dongStatus.dataset.dataType;
+
+                    //지역 선택 창 열기 버튼에 시도 시군구 읍면동 이름 입력
+                    regionButtonText.textContent = `${regionStatus.textContent} ${sigunguStatus.textContent} ${dongStatus.textContent}`
+
+                }
+
+
+                userSearchData["regionId"] = selectedRegionData.id;
+                userSearchData["regionName"] = selectedRegionData.name;
+                userSearchData["dataType"] = selectedRegionData.dataType;
+
+                //페이지 번호 초기화
+                pageNumber = 0;
+                //유저가 입력한 데이터로 place 정보를 받아오는 API를 호출합니다.
+
+                //스크롤 이벤트 초기화
+                blockScrollEvent = false;
+
+                fetchUserSearchData()
+
+                //지역 선택 박스 닫기
+                const regionContainer = document.querySelector("#region-container");
+                regionContainer.classList.add("hidden");
+                regionContainer.classList.remove("visible");
+
+                setTimeout(function () {
+                    regionContainer.classList.add('d-none');
+                }, 500); // 100밀리초(0.1초) 후에 실행
+
+
+
+                //  console.log(`현재 선택된 지역정보 id= ${selectedRegionData.id}
+                //     , dataType = ${selectedRegionData.dataType}
+                //     , name = ${selectedRegionData.name}`)
+
+
+
+                //시도 데이터 있으면 저장
+                //시군구 데이터 있으면 저장
+                //읍면동 데이터 있으면 저장
+
+
+
+
+            })
+
+
+
+
+            // *********** 카테고리 관련 기능들 *****************
+
+            // 카테고리 선택창 닫기버튼 핸들링 함수
+            document.querySelector(".close-category").addEventListener('click', function () {
+                console.log("카테고리 닫기버튼 클릭");
+                const categoryContainer = document.querySelector("#category-container");
+                categoryContainer.classList.add("hidden");
+                categoryContainer.classList.remove("visible");
+
+                setTimeout(function () {
+                    regionContainer.classList.add('d-none');
+                }, 500); // 100밀리초(0.1초) 후에 실행
+
+            })
+
+            // 카테고리 선택창 열기버튼 핸들링 함수
+            document.querySelector(".category-button").addEventListener('click', function () {
+                const categoryContainer = document.querySelector("#category-container");
+                categoryContainer.classList.remove("d-none");
+
+                setTimeout(() => {
+                    categoryContainer.classList.remove("hidden");
+                    categoryContainer.classList.add("visible");
+                })
+
+            }, 100);
+
+
+
+            //카테고리 박스를 만드는 fetch 함수입니다.
+            function fetchCategoryList() {
+                fetch("http://localhost:8080/categories/list", {
+                    method: 'GET'
+                }).then(response => {
                     if (!response.ok) {
-                        throw new Error("서버 에러 발생");
-                    } else {
-                        return response.json();//서버에서 받아온 데이터를 JSON으로 변환합니다.
+                        throw new Error('통신 에러 발생')
+                    }
+                    else {
+                        return response.json();
                     }
                 }).then(data => {
-                    console.log("서버에서 받아온 데이터 수=" + data.length);
+                    makeCategoryListBoxes(data);
+                }).catch(error => {
+
+                })
+            }
+
+
+            //카테고리 리스트를 만드는 함수입니다.
+            const makeCategoryListBoxes = (data) => {
+
+                console.log("카테고리 박스 만들기 기능진입")
+                //category list를 담는 컨테이너를 불러옵니다.
+                const categoryListContainer = document.querySelector(".category-list-container")
+                //innerHTML을 초기화합니다.
+                categoryListContainer.innerHTML = '';
+                //innerHTML에 넣을 객체입니다.
+                categoryListInnerHtml = '';
+
+                // 박스를 생성하여 객체에 저장.
+                for (let i = 0; i < data.length; i++) {
+                    // console.log("출력할 데이터=", data[i].id)
+                    // console.log("출력할 타입=", data[i].dataType)
+
+                    categoryListInnerHtml +=
+                        ` <div class="col-4 category-list-box d-flex justify-content-center" data-id="${data[i].categoryId}" data-datatype="category">
+            ${data[i].categoryName}
+               </div>`
+                };
+
+                //만들어진 박스를 컨테이너에  담습니다.
+                categoryListContainer.innerHTML = categoryListInnerHtml;
+
+            }
+
+            fetchCategoryList();
+
+            //선택 완료 버튼 누르면 유저가 선택한 카테고리로 바꿔주세요~
+            document.querySelector('#category-select-button').addEventListener('click', () => {
+                console.log("클릭감지");
+                changeSelectCategory()
+
+            })
+
+            //유저가 카테고리 선택완료시, 상단의 카테고리명 박스의 내용을 바꾸고 post 요청을 보냅니다.
+            const changeSelectCategory = () => {
+                //상단의 카테고리명이 적힌 박스입니다.
+                const categoryButtonText = document.querySelector(".category-button-text")
+
+                // 텍스트 내용 초기화
+                categoryButtonText.textContent = '';
+
+                //유저가 선택한 카테고리로 변경
+                categoryButtonText.textContent = selectedCategoryData.name;
+
+                //창닫기
+                const categoryContainer = document.querySelector("#category-container");
+                categoryContainer.classList.add("hidden");
+                categoryContainer.classList.remove("visible");
+
+
+
+                setTimeout(function () {
+                    regionContainer.classList.add('d-none');
+                }, 500); // 100밀리초(0.1초) 후에 실행
+
+                userSearchData["categoryId"] = selectedCategoryData.id;
+
+                //페이지 번호 초기화
+                pageNumber = 0;
+                fetchUserSearchData();
+
+                // 스크롤 이벤트 초기화
+                blockScrollEvent = false;
+
+
+            }
+
+            //**********place 정보를 보내주는 API 호출*********
+
+            // 유저가 선택한 정보들을 바탕으로 시설(place) 정보를 받아오는 함수입니다.
+            function fetchUserSearchData() {
+                //place 정보를 저장할 DOM 컨테이너입니다.
+                let container = document.querySelector('.place-information-container');
+
+                //페이지 번호가 0번일경우, 현재 렌더링된 place 정보를 초기화합니다.
+                if (pageNumber == 0) {
+                    container.innerHTML = '';
+                }
+
+                //서버 전송용 객체에 현재 페이지 번호를 할당합니다.
+                userSearchData.pageNumber = pageNumber;
+
+                console.log("fetchUserSelectData 진입")
+                console.log(userSearchData);
+
+                fetch("http://localhost:8080/places/search", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userSearchData)
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('통신 에러 발생')
+                    }
+                    else {
+                        return response.json();
+                    }
+                }).then(data => {
                     //데이터 수가 20개 미만이면 스크롤 이벤트를 차단합니다.(마지막 페이지)
                     if (data.length < 20) {
                         blockScrollEvent = true;
                     }
 
-                    // HTML에서 클래스가 "place-information-container"인 요소를 선택합니다.
-                    let container = document.querySelector('.place-information-container');
-                    // 
+
+
+                    //컨테이너의 값을 초기화합니다.
                     let listBoxes = '';
+
+
+
+
                     data.forEach(element => {
-                        // 서버에서 받아온 데이터를 사용하여 리스트 아이템의 HTML을 생성하고 listBoxes에 추가합니다.
-                        listBoxes = addPlaceListBox(element, listBoxes);
+                        //서버에서 전달된 데이터로 place 정보 박스를 만듭니다.
+                        listBoxes = makePlaceInformList(element, listBoxes);
                     });
-                    // 현재 컨테이너의 내부 HTML을 저장합니다.
-                    let containerInnerHtml = container.innerHTML;
-                    // 이전 HTML 내용과 새로 생성된 listBoxes를 합쳐서 컨테이너의 내부 HTML을 갱신합니다.
-                    container.innerHTML = containerInnerHtml + listBoxes;
-                    showPlaceDetail();
+
+
+
+                    const nowPlaceList = container.innerHTML;
+
+                    container.innerHTML = nowPlaceList + listBoxes;
+
+                    //만들어진 시설 정보 박스에 이벤트 리스터를 붙입니다.
+                    //박스 클릭시 시설(place) 상세 페이지로 이동합니다.
+                    let boxes = document.querySelectorAll(".place-list-box");
+                    boxes.forEach(element => {
+                        element.addEventListener('click', () => {
+                            console.log("place클릭")
+                            const detailUrl = `places/${element.dataset.placeId}`
+                            //새창에서 시설 상세 페이지를 엽니다
+                            openUrlInNewTab(detailUrl);
+
+                        })
+
+                    });
+
+                    //지도에서 마커의 좌표를 저장하는 배열을 만드는 함수입니다.
+                    //불러온 place의 위도 경도를 저장합니다.
+                    makePlaceMarkers(data);
+
+
+
                 }).catch(error => {
-                    alert('에러 발생 함수' + error);
+                    alert('place 만들던중 에러 발생' + error);
+
                 })
-        }
-        // }
+            }
 
 
-
-
-
-
-
-        /**
-         * 서버로부터 받아온 data로 place 정보를 list 형태로 만드는 함수입니다.
-         * @param {data} place 서버로부터 받아온 data입니다.
-         * @param listBoxes placeList를 저장할 DOM입니다.
-         * @returns placeList를 담은 DOM을 반환합니다.
-         */
-        function addPlaceListBox(place, listBoxes) {
-            listBoxes +=
-                `<div class="justify-content-between bg-white w-100 place-list-box" style="margin-top: 1px;" id="place-information-box"
+            //시설(place) 정보 박스를 만드는 함수입니다.
+            const makePlaceInformList = (place, listBoxes) => {
+                listBoxes +=
+                    `<div class="justify-content-between bg-white w-100 place-list-box" style="margin-top: 1px;" id="place-information-box"
                      data-place-id = ${place.placeId} >
-                     <div class="w-100" id="place-text-box">
+                   
                      <div class="p-1 text-muted"><span class="small">${place.categoryName}</span>
                       </div>
                          <div class="p-1"><span class="h6" ">${place.placeName}</span></div>
@@ -659,588 +1544,48 @@
                      </div>
                      <div id="place-img-box">
                              </div>
-                      </div>`
-            return listBoxes;
-
-        }
-
-        /** place list box를 클릭시 해당 place의 상세 페이지로 이동하는 함수입니다.
-         *
-         */
-        const showPlaceDetail = () => {
-            // place 정보가 담겨있는 box를 선택합니다.
-            let placeListBoxes = document.querySelectorAll('.place-list-box');
-
-            // 각 place box에 대해 클릭 이벤트를 추가합니다.
-            placeListBoxes.forEach(placeBox => {
-                placeBox.addEventListener('click', function () {
-                    // 클릭한 place의 상세 페이지 URL을 생성합니다.
-                    const detailUrl = `places/${placeBox.dataset.placeId}`
-                    // console.log('URL = ' + detailUrl);
-                    // 생성된 URL로 페이지를 이동합니다.
-                    redirectPage(detailUrl);
-                })
-
-            });
-        }
-
-
-
-        /**
-         * 로딩화면을 보여주는 함수입니다. 1초뒤 로딩화면이 사라집니다.
-         */
-        const showLoadingScreen = () => {
-            // console.log("변경진입");
-            const loadingScreen = document.querySelector('.overlay')//로딩화면 객체에 저장.
-            loadingScreen.classList.remove('d-none');//부트스트랩 display-none 클래스 제거
-            loadingScreen.classList.add('d-block');//부트스트랩 display-block 클래스 추가
-            loadingScreen.addEventListener('click', function (event) {
-            })
-            //1초뒤 로딩화면을 숨깁니다.
-            setTimeout(function () {
-                document.body.style.overflow = '';
-                loadingScreen.classList.remove('d-block');
-                loadingScreen.classList.add('d-none');
-            }, 1000)
-
-        }
+                    `
+                return listBoxes;
 
 
 
 
-        const categoryBoxes = document.querySelectorAll(".category-box");
-        categoryBoxes.forEach(categoryBox => {
-            categoryBox.addEventListener('click', function () {
-                const categoryId = categoryBox.dataset.categoryId;
-                console.log("카테고리 박스 클릭 감지" + categoryId);
-                categoryBox.style.color = "#4a74fc"; // 글씨색 변경
-                categoryBox.style.borderColor = "#4a74fc"; // 테두리 색상 변경
-                categoryBox.style.fontWeight = "bold"; // 글씨 굵게 변경
-                categoryBoxes.forEach(box => {
-                    if (box !== categoryBox) {
-                        box.style.color = ""; // 글씨색 초기화
-                        box.style.borderColor = ""; // 테두리 색상 초기화
-                        box.style.fontWeight = ""; // 글씨 굵기 초기화
-                    }
-                }
 
-                )
             }
-            )
-        }
+
+            //********검색어 클릭 관련 기능들***********
+
+            //search 버튼 누르면
+
+
+            document.querySelector(".search-button").addEventListener('click', () => {
+
+                const searchInput = document.querySelector("#search-input")
+                const searchWord = searchInput.value;
+                console.log("검색버튼 클릭 감지, 검색어 =" + searchWord);
+
+
+                userSearchData['searchWord'] = searchWord;
+
+                pageNumber = 0;
+
+                fetchUserSearchData();
+
+                //입력한거 받아서
+                //fetch 함수 부르슈~
 
 
 
-
-        );
-
-
-        //**************************지역 선택 관련 함수들 ****************
-
-        //비동기 방식으로 POST요청을 보내기 위한 함수입니다.
-        function fetchRegionList(id, dataType, name) {
-
-            let postData = {
-                id: id,
-                dataType: dataType,
-                name: name
-            };
-            fetch("http://localhost:8080/regions/list", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(postData)
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('통신 에러 발생')
-                }
-                else {
-                    return response.json();
-                }
-            }).then(data => {
-                makeRegionListBoxes(data);
-            }).catch(error => {
 
             })
-        }
 
-        // 지역 박스를 만드는 함수입니다. 유저가 선택한 지역의 하위 지역들을 박스로 만듭니다.
-        const makeRegionListBoxes = (data) => {
-            console.log("지역 박스 만들기 기능진입")
-            //region list를 담는 컨테이너를 불러옵니다.
-            const regionListContainer = document.querySelector(".region-list-container")
-            //innerHTML을 초기화합니다.
-            regionListContainer.innerHTML = '';
-            //innerHTML에 넣을 객체입니다.
-            regionListInnerHtml = '';
 
-            // 박스를 생성하여 객체에 저장.
-            for (let i = 0; i < data.length; i++) {
-                // console.log("출력할 데이터=", data[i].id)
-                // console.log("출력할 타입=", data[i].dataType)
 
-                regionListInnerHtml +=
-                    ` <div class="col-4 region-list-box d-flex justify-content-center" data-id="${data[i].id}" data-datatype="${data[i].dataType}">
-   ${data[i].name}
-      </div>`
-            };
 
-            //만들어진 박스를 컨테이너에  담습니다.
-            regionListContainer.innerHTML = regionListInnerHtml;
-        }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("DOM 로딩 완료")
-            fetchRegionList();
-        });
 
 
-        // 시도 클릭 이벤트 위임
-        document.addEventListener('click', function (event) {
-            if (event.target.classList.contains('region-list-box')) {
-                const id = event.target.dataset.id;
-                const dataType = event.target.dataset.datatype;
-
-
-                const name = event.target.textContent;
-                console.log(`클릭한요소 =  id:${id}, name:${name}, dataType:${dataType}`);
-
-                //상단의 시도 시군구 읍면동 정보창을 동기화합니다.
-                changeStatusBox(id, dataType, name);
-
-                //클릭한 데이터가 시도(region) 또는 시군구(subRegion)일때만 매핑된 자료를 요청합니다.
-                if (dataType == "region" || dataType == "subRegion") {
-                    fetchRegionList(id, dataType, name);
-                }
-
-            }
-
-            // 카테고리 선택시 핸들링
-            if (event.target.classList.contains('category-list-box')) {
-                console.log("카테고리 박스 클릭 감지")
-
-                let boxes = document.querySelectorAll('.category-list-box')
-                boxes.forEach(element => {
-                    element.classList.remove("clicked-box")
-                    
-                });
-
-                changeClickedBoxColor(event.target)
-
-                
-
-                const id = event.target.dataset.id;
-                const name = event.target.textContent;
-                console.log(`클릭한 카테고리 요쇼 =  id:${id}, name:${name}`);
-
-
-
-                selectedCategoryData["id"] = id;
-                selectedCategoryData["name"] = name;
-            }
-
-        });
-
-        //시도 status 박스 클릭시 처리
-        //시도 리스트를 서버로부터 받아와 출력합니다.
-        document.querySelector("#region-status").addEventListener('click', function () {
-            console.log("시도 박스 클릭")
-            fetchRegionList();
-
-        })
-
-
-        // 클릭된 박스의 색을 바꾸는 함수입니다.
-        const changeClickedBoxColor = (clickedBox)=>{
-
-            clickedBox.classList.add("clicked-box")
-
-
-
-        }
-
-
-
-        document.querySelector("#sub-region-status").addEventListener("click", function () {
-            console.log("시군구 박스 클릭")
-            const regionStatus = document.querySelector("#region-status")
-
-            const regionId = regionStatus.dataset.id;
-            const dataType = "region"
-            fetchRegionList(regionId, dataType);
-
-
-        })
-
-        //지역 status 창(상단 3개 박스) 내용을 바꾸는 함수입니다.
-        const changeStatusBox = (id, dataType, name) => {
-            const regionStatus = document.querySelector("#region-status")
-            const subRegionStatus = document.querySelector("#sub-region-status")
-            const dongRegionStatus = document.querySelector("#dong-region-status")
-
-            if (dataType == "region") {
-                regionStatus.textContent = name;
-                regionStatus.dataset.id = id;
-                regionStatus.dataset.dataType = dataType;
-                //시군구 읍면동 div 내용 초기화
-                clearRegionContent(subRegionStatus, "시군구")
-                clearRegionContent(dongRegionStatus, "읍면동")
-            }
-            if (dataType == "subRegion") {
-                subRegionStatus.textContent = name;
-                subRegionStatus.dataset.id = id;
-                subRegionStatus.dataset.dataType = dataType;
-                //읍면동 div 내용 초기화
-                clearRegionContent(dongRegionStatus, "읍면동")
-
-            }
-            if (dataType == "dongRegion") {
-                dongRegionStatus.textContent = name;
-                dongRegionStatus.dataset.id = id;
-                dongRegionStatus.dataset.dataType = dataType;
-            }
-
-        }
-
-        // 지역 선택창 상단의 유저가 선택한 지역 초기화 함수입니다.
-        const clearRegionContent = (regionElement, name) => {
-            //id 초기화
-            delete regionElement.dataset.id;
-            //dataType 초기화
-            delete regionElement.dataset.dataType
-            //텍스트 초기화
-            regionElement.textContent = name;
-        }
-
-
-        // 지역 선택창 닫기버튼 핸들링 함수
-        document.querySelector(".close-region").addEventListener('click', function () {
-            console.log("닫기버튼 클릭");
-            const regionContainer = document.querySelector("#region-container");
-            regionContainer.classList.add("hidden");
-            regionContainer.classList.remove("visible");
-
-            setTimeout(function () {
-                regionContainer.classList.add('d-none');
-            }, 500); // 100밀리초(0.1초) 후에 실행
-
-        })
-
-        // 지역 선택창 열기버튼 핸들링 함수
-        document.querySelector(".region-button").addEventListener('click', function () {
-            const regionContainer = document.querySelector("#region-container");
-            regionContainer.classList.remove("d-none");
-
-            setTimeout(() => {
-                regionContainer.classList.remove("hidden");
-                regionContainer.classList.add("visible");
-            })
-
-        }, 100);
-
-
-        /**
-         * 선택 완료 버튼을 클릭시 작동합니다.
-         * 유저가 선택한 지역 정보를 객체에 내용을 저장하고 지역 선택 버튼에 내용을 반영하는 함수입니다.
-         */
-        document.querySelector("#region-select-button").addEventListener('click', function () {
-            const regionStatus = document.querySelector("#region-status");
-            const subRegionStatus = document.querySelector("#sub-region-status");
-            const dongRegionStatus = document.querySelector("#dong-region-status");
-
-            const regionId = regionStatus.dataset.id;
-            const subRegionId = subRegionStatus.dataset.id;
-            const dongRegionId = dongRegionStatus.dataset.id;
-
-            //지역 선택 버튼 텍스트 입니다. 현재 유저가 선택한 지역을 시도/시군구/읍면동 순서로 보여줍니다.
-            let regionButtonText = document.querySelector(".region-button-text");
-            //내용을 초기화합니다.
-            regionButtonText.textContent = '';
-
-
-
-            // 시도 데이터는 필수 선택사항입니다. 선택하지 않으면 경고창을 띄웁니다.
-            if (regionId == undefined) {
-                alert("시/도 지역을 선택해 주세요!")
-            }
-
-            //시도는 선택, 시군구는 선택하지 않았을때 처리
-            if (regionId != undefined && subRegionId == undefined) {
-                selectedRegionData["id"] = regionId
-                selectedRegionData["name"] = regionStatus.textContent;
-                selectedRegionData["dataType"] = regionStatus.dataset.dataType;
-                //시도 이름 입력
-                regionButtonText.textContent = `${regionStatus.textContent}`
-
-                //시도는 시군구는 선택, 읍면동은 선택하지 않았을때 처리
-            } else if (subRegionId != undefined && dongRegionId == undefined) {
-                selectedRegionData["id"] = subRegionId
-                selectedRegionData["name"] = subRegionStatus.textContent;
-                selectedRegionData["dataType"] = subRegionStatus.dataset.dataType;
-
-                //시도 시군구 이름 입력
-                regionButtonText.textContent = `${regionStatus.textContent} ${subRegionStatus.textContent}`
-
-                //시도는 시군구는 읍면동은 선택했을때 처리
-
-            } else if (dongRegionId != undefined) {
-                selectedRegionData["id"] = dongRegionId
-                selectedRegionData["name"] = dongRegionStatus.textContent;
-                selectedRegionData["dataType"] = dongRegionStatus.dataset.dataType;
-
-                //시도 시군구 읍면도 이름 입력
-                regionButtonText.textContent = `${regionStatus.textContent} ${subRegionStatus.textContent} ${dongRegionStatus.textContent}`
-
-            }
-
-
-            userSelectData["regionId"] = selectedRegionData.id;
-            userSelectData["regionName"] = selectedRegionData.name;
-            userSelectData["dataType"] = selectedRegionData.dataType;
-
-            //페이지 번호 초기화
-            pageNumber = 0;
-            //유저가 입력한 데이터로 place 정보를 받아오는 API를 호출합니다.
-
-            fetchUserSelectData()
-
-            //지역 선택 박스 닫기
-            const regionContainer = document.querySelector("#region-container");
-            regionContainer.classList.add("hidden");
-            regionContainer.classList.remove("visible");
-
-            setTimeout(function () {
-                regionContainer.classList.add('d-none');
-            }, 500); // 100밀리초(0.1초) 후에 실행
-
-
-
-            //  console.log(`현재 선택된 지역정보 id= ${selectedRegionData.id}
-            //     , dataType = ${selectedRegionData.dataType}
-            //     , name = ${selectedRegionData.name}`)
-
-
-
-            //시도 데이터 있으면 저장
-            //시군구 데이터 있으면 저장
-            //읍면동 데이터 있으면 저장
-
-
-
-
-        })
-
-
-
-
-        // *********** 카테고리 관련 기능들 *****************
-
-        // 카테고리 선택창 닫기버튼 핸들링 함수
-        document.querySelector(".close-category").addEventListener('click', function () {
-            console.log("카테고리 닫기버튼 클릭");
-            const categoryContainer = document.querySelector("#category-container");
-            categoryContainer.classList.add("hidden");
-            categoryContainer.classList.remove("visible");
-
-            setTimeout(function () {
-                regionContainer.classList.add('d-none');
-            }, 500); // 100밀리초(0.1초) 후에 실행
-
-        })
-
-        // 카테고리 선택창 열기버튼 핸들링 함수
-        document.querySelector(".category-button").addEventListener('click', function () {
-            const categoryContainer = document.querySelector("#category-container");
-            categoryContainer.classList.remove("d-none");
-
-            setTimeout(() => {
-                categoryContainer.classList.remove("hidden");
-                categoryContainer.classList.add("visible");
-            })
-
-        }, 100);
-
-
-
-        //카테고리 박스를 만드는 fetch 함수입니다.
-        function fetchCategoryList() {
-            fetch("http://localhost:8080/categories/list", {
-                method: 'GET'
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('통신 에러 발생')
-                }
-                else {
-                    return response.json();
-                }
-            }).then(data => {
-                makeCategoryListBoxes(data);
-            }).catch(error => {
-
-            })
-        }
-
-
-        //카테고리 리스트를 만드는 함수입니다.
-        const makeCategoryListBoxes = (data) => {
-
-            console.log("카테고리 박스 만들기 기능진입")
-            //category list를 담는 컨테이너를 불러옵니다.
-            const categoryListContainer = document.querySelector(".category-list-container")
-            //innerHTML을 초기화합니다.
-            categoryListContainer.innerHTML = '';
-            //innerHTML에 넣을 객체입니다.
-            categoryListInnerHtml = '';
-
-            // 박스를 생성하여 객체에 저장.
-            for (let i = 0; i < data.length; i++) {
-                // console.log("출력할 데이터=", data[i].id)
-                // console.log("출력할 타입=", data[i].dataType)
-
-                categoryListInnerHtml +=
-                    ` <div class="col-4 category-list-box d-flex justify-content-center" data-id="${data[i].categoryId}" data-datatype="category">
-            ${data[i].categoryName}
-               </div>`
-            };
-
-            //만들어진 박스를 컨테이너에  담습니다.
-            categoryListContainer.innerHTML = categoryListInnerHtml;
-
-        }
-
-        fetchCategoryList();
-
-        //선택 완료 버튼 누르면 유저가 선택한 카테고리로 바꿔주세요~
-        document.querySelector('#category-select-button').addEventListener('click', () => {
-            console.log("클릭감지");
-            changeSelectCategory()
-
-        })
-
-        //유저가 카테고리 선택완료시, 상단의 카테고리명 박스의 내용을 바꾸고 post 요청을 보냅니다.
-        const changeSelectCategory = () => {
-            //상단의 카테고리명이 적힌 박스입니다.
-            const categoryButtonText = document.querySelector(".category-button-text")
-
-            // 텍스트 내용 초기화
-            categoryButtonText.textContent = '';
-
-            //유저가 선택한 카테고리로 변경
-            categoryButtonText.textContent = selectedCategoryData.name;
-
-            //창닫기
-            const categoryContainer = document.querySelector("#category-container");
-            categoryContainer.classList.add("hidden");
-            categoryContainer.classList.remove("visible");
-
-
-
-            setTimeout(function () {
-                regionContainer.classList.add('d-none');
-            }, 500); // 100밀리초(0.1초) 후에 실행
-
-            userSelectData["categoryId"] = selectedCategoryData.id;
-
-            //페이지 번호 초기화
-            pageNumber = 0;
-            fetchUserSelectData();
-
-        }
-
-        //**********place 정보를 보내주는 API 호출*********
-
-        // 유저가 선택한 정보들을 바탕으로 시설(place) 정보를 받아오는 함수입니다.
-        function fetchUserSelectData() {
-            //place 정보를 저장할 DOM 컨테이너입니다.
-            let container = document.querySelector('.place-information-container');
-
-            //페이지 번호가 0번일경우, 현재 렌더링된 place 정보를 초기화합니다.
-            if (pageNumber == 0) {
-                container.innerHTML = '';
-            }
-
-            //서버 전송용 객체에 현재 페이지 번호를 할당합니다.
-            userSelectData.pageNumber = pageNumber;
-
-            console.log("fetchUserSelectData 진입")
-
-            fetch("http://localhost:8080/places/search", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(userSelectData)
-            }).then(response => {
-                if (!response.ok) {
-                    throw new Error('통신 에러 발생')
-                }
-                else {
-                    return response.json();
-                }
-            }).then(data => {
-                //데이터 수가 20개 미만이면 스크롤 이벤트를 차단합니다.(마지막 페이지)
-                if (data.length < 20) {
-                    blockScrollEvent = true;
-                }
-
-
-
-                //컨테이너의 값을 초기화합니다.
-                let listBoxes = '';
-
-
-
-                data.forEach(element => {
-                    //서버에서 전달된 데이터로 place 정보 박스를 만듭니다.
-                    listBoxes = makePlaceInformList(element, listBoxes);
-                });
-
-               const nowPlaceList = container.innerHTML; 
-            
-                container.innerHTML = nowPlaceList + listBoxes;
-
-            }).catch(error => {
-                alert('에러 발생' + error);
-
-            })
-        }
-
-
-        const makePlaceInformList = (place, listBoxes) => {
-            listBoxes +=
-                `<div class="justify-content-between bg-white w-100 place-list-box" style="margin-top: 1px;" id="place-information-box"
-                     data-place-id = ${place.placeId} >
-                     <div class="w-100" id="place-text-box">
-                     <div class="p-1 text-muted"><span class="small">${place.categoryName}</span>
-                      </div>
-                         <div class="p-1"><span class="h6" ">${place.placeName}</span></div>
-                       <div class="p-1 text-muted"><span class="small"">${place.placeRoadAddress}</span>
-                         </div>
-                     </div>
-                     <div id="place-img-box">
-                             </div>
-                      </div>`
-            return listBoxes;
-
-
-
-
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-    </script>
+        </script>
 
 
 
