@@ -23,7 +23,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public List<DepartmentNameDto> getAllDepartmentNameDto() {
         List<Department> departmentList = departmentRepository.findAll();
-        List<DepartmentNameDto> departmentNameDtoList = departmentList.stream().map(Department -> DepartmentNameDto.builder()
+        List<DepartmentNameDto> departmentNameDtoList = departmentList.stream()
+        .filter(department -> department.getDepartmentName().equals("치과")||department.getDepartmentType().equals("의학"))
+
+                .map(Department -> DepartmentNameDto.builder()
                 .departmentId(Department.getDepartmentId())
                 .departmentName(Department.getDepartmentName())
                 .build()).collect(Collectors.toList());
