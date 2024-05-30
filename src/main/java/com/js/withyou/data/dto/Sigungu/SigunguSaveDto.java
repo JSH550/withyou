@@ -1,4 +1,4 @@
-package com.js.withyou.data.dto.SubRegion;
+package com.js.withyou.data.dto.Sigungu;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -6,11 +6,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SubRegionSaveDto {
+public class SigunguSaveDto {
 
     @NotBlank(message = "세부지역 이름 정보 없음")
-    private String subRegionName; //
+    private String sigunguName; //
     @NotBlank(message = "지역 이름 정보 없음")
-    private Long regionId;
+    private Long sidoId;
 
 }
