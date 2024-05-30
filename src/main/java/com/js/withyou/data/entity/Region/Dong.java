@@ -12,19 +12,19 @@ import java.util.List;
 @Entity
 @Getter
 @RequiredArgsConstructor
-public class DongRegion {
+public class Dong {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long dongRegionId ;
+    private Long dongId ;
 
     @Column//중복된 동이름 존재
-    private String dongRegionName; //
+    private String dongName; //
 
     @ManyToOne
-    @JoinColumn(name = "subRegion_id",nullable = false)//상위카테고리는 null이면 안된다.
-    private SubRegion subRegion;
+    @JoinColumn(name = "sigungu_id",nullable = false)//상위카테고리는 null이면 안된다.
+    private Sigungu sigungu;
 
-    @OneToMany(mappedBy = "dongRegion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "dong", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Place> places = new ArrayList<>();
 }
