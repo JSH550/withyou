@@ -21,6 +21,8 @@ public class Department {
 
     private String departmentName;
 
+    @Column(nullable = false,length = 10)
+    private String departmentType;
 
     @OneToMany(mappedBy = "department",cascade =CascadeType.ALL, fetch =  FetchType.LAZY)
     private List<PlaceDepartment> placeDepartments = new ArrayList<>();
