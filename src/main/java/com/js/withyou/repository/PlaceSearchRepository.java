@@ -45,16 +45,13 @@ public class PlaceSearchRepository {
             selectQuery.append("JOIN PlaceDepartment pd ON p.placeId = pd.place.placeId ");
 
             //유저가 치과를 선택했을 경우, 치과와 관련된 진료과목 포함하는 place 반환합니다.
-            if (departmentId == 49){
-                conditions.add("pd.department.departmentId BETWEEN :minId AND :maxId ");
+            if (departmentId == 49) {
+                conditions.add("pd.department.departmentId BETWEEN :minDepartmentId AND :maxDepartmentId ");
 //                conditions.add("pd.department.departmentId = 49 ");
 //                conditions.add("pd.department.departmentId BETWEEN 50 and 61 ");
 
 
-
-            }
-
-            else {
+            } else {
                 conditions.add("pd.department.departmentId  = :departmentId ");
 
 
@@ -86,9 +83,14 @@ public class PlaceSearchRepository {
             conditions.add("p.placeName LIKE :searchWord");
         }
         // 카테고리(categoryId) 정보가 있을 때 조건문을 추가합니다.
-        if (categoryId != null ) {
-//            conditions.add("p.category.categoryId = :categoryId");
-            conditions.add("c.categoryId = :categoryId");
+        if (categoryId != null) {
+            if (categoryId == 71L) {
+                conditions.add("c.categoryId BETWEEN :minCategoryId AND :maxCategoryId ");
+
+            } else
+                conditions.add("c.categoryId = :categoryId");
+            {
+            }
         }
 
         // 조건문이 비어있지 않으면 조건문들을 연결합니다.
@@ -98,8 +100,6 @@ public class PlaceSearchRepository {
             query.append("WHERE ").append(String.join(" AND ", conditions));
             selectQuery.append("WHERE ").append(String.join(" AND ", conditions));
         }
-
-
 
 
         // 전체 레코드 수를 구하는 쿼리
@@ -121,28 +121,39 @@ public class PlaceSearchRepository {
             countTypedQuery.setParameter("regionId", regionId);
         }
         if (categoryId != null) {
-            typedQuery.setParameter("categoryId", categoryId);
-            countTypedQuery.setParameter("categoryId", categoryId);
+            if (categoryId == 71L) {
+                typedQuery.setParameter("minCategoryId", 71);
+                typedQuery.setParameter("maxCategoryId", 75);
+
+                countTypedQuery.setParameter("minCategoryId", 71);
+                countTypedQuery.setParameter("maxCategoryId", 75);
+
+            }
+
+            else {
+                typedQuery.setParameter("categoryId", categoryId);
+                countTypedQuery.setParameter("categoryId", categoryId);
+
+            }
+
         }
         if (departmentId != null) {
 
-            if (departmentId == 49){
-                typedQuery.setParameter("minId", 49);
-                typedQuery.setParameter("maxId", 61);
+            if (departmentId == 49) {
+                typedQuery.setParameter("minDepartmentId", 49);
+                typedQuery.setParameter("maxDepartmentId", 61);
 //
-                countTypedQuery.setParameter("minId", 49);
-                countTypedQuery.setParameter("maxId", 61);
-            }
-            else {
-            typedQuery.setParameter("departmentId", departmentId);
-            countTypedQuery.setParameter("departmentId", departmentId);
+                countTypedQuery.setParameter("minDepartmentId", 49);
+                countTypedQuery.setParameter("maxDepartmentId", 61);
+            } else {
+                typedQuery.setParameter("departmentId", departmentId);
+                countTypedQuery.setParameter("departmentId", departmentId);
 
             }
         }
 
 
-
-        log.info("PlaceSearch 쿼리 = {}",countTypedQuery);
+        log.info("PlaceSearch 쿼리 = {}", countTypedQuery);
 
         // 페이징 적용
         typedQuery.setFirstResult((int) pageable.getOffset());
@@ -151,7 +162,6 @@ public class PlaceSearchRepository {
         // 결과 리스트와 전체 레코드 수 가져오기
         List<Place> places = typedQuery.getResultList();
         Long total = countTypedQuery.getSingleResult();
-
 
 
         // 쿼리 실행 후 결과 리스트를 반환합니다.
