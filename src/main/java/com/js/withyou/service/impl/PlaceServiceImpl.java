@@ -14,6 +14,7 @@ import com.js.withyou.data.entity.Place.Place;
 import com.js.withyou.data.entity.Region.Sigungu;
 import com.js.withyou.repository.CategoryRepository;
 import com.js.withyou.repository.PlaceRepository;
+import com.js.withyou.repository.PlaceSearchRepository;
 import com.js.withyou.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,21 +50,24 @@ public class PlaceServiceImpl implements PlaceService {
 
     private final PlaceRepository placeRepository;
 
+    private final PlaceSearchRepository placeSearchRepository;
+
     private final CategoryService categoryService;
 
 
     private final CategoryRepository categoryRepository;
     // 수정된 부분: 인스턴스 변수로 변경하여 @Value 어노테이션이 제대로 동작하도록 함
 //    @Value("${kakao.restapi.key}")
-    private final String KAKAO_API_KEY = "8f51e140457787ad945ffce8f4b6ac5a";
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public PlaceServiceImpl(SidoService sidoService, SigunguService sigunguService, PlaceRepository placeRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
+    public PlaceServiceImpl(SidoService sidoService, SigunguService sigunguService, PlaceRepository placeRepository, PlaceSearchRepository placeSearchRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
         this.sidoService = sidoService;
         this.sigunguService = sigunguService;
         this.placeRepository = placeRepository;
+        this.placeSearchRepository = placeSearchRepository;
+
         this.categoryService = categoryService;
         this.categoryRepository = categoryRepository;
         this.restTemplate = new RestTemplate();
@@ -345,6 +349,32 @@ public class PlaceServiceImpl implements PlaceService {
 //        }
 
 
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<PlaceListDto> getPlaceListDtoBySearchConditions(PlaceSearchRequestDto placeSearchRequestDto,Pageable pageable) {
+
+        log.info("검색 메서드 진입.");
+        //DB에서 조건에 맞는 레코드를 찾습니다.(동적쿼리)
+        Page<Place> placeList = placeSearchRepository.searchPlaces(
+                placeSearchRequestDto.getSearchWord(),
+                placeSearchRequestDto.getCategoryId(),
+                placeSearchRequestDto.getDepartmentId(),
+                placeSearchRequestDto.getDataType(),
+                placeSearchRequestDto.getRegionId()
+                ,pageable
+        );
+
+        log.info("페이지 정보 totalPage={},totalElement{}",placeList.getTotalPages(),placeList.getTotalElements());
+        //Place 엔티티를 DTO로 변환합니다.
+        List<PlaceListDto> placeListDtoList = placeList.stream().map(Place -> {
+            PlaceListDto placeListDto = new PlaceListDto();
+            return placeListDto.convertToPlaceListDto(Place);
+
+        }).collect(Collectors.toList());
+
+        return placeListDtoList;
     }
 
     /**
@@ -630,7 +660,6 @@ public class PlaceServiceImpl implements PlaceService {
         String url = KAKAO_API_URL.replace("{address}", address);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "KakaoAK " + KAKAO_API_KEY);
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);

@@ -81,6 +81,7 @@ public interface PlaceService {
     List<PlaceListDto>  getPlaceListDtoByPlaceSearchRequestDto(PlaceSearchRequestDto placeSearchRequestDTO , Pageable pageable);
 
 
+    List<PlaceListDto> getPlaceListDtoBySearchConditions(PlaceSearchRequestDto placeSearchRequestDto,Pageable pageable);
 
 
 
