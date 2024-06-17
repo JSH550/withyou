@@ -223,11 +223,36 @@ class PlaceServiceImplTest {
     }
 
 
+    //Data JPA 테스트
     @Test
-    public void getPlaceListDtoBySearchConditionsTest(){
+    public void searchPlaceBySearchWordTest(){
+        String searchWord = "으뜸";
+
+        List<PlaceListDto> placeListDtoList = placeService.searchPlaceBySearchWord(searchWord);
+
+        for (PlaceListDto placeListDto : placeListDtoList) {
+            System.out.println(placeListDto.getPlaceName());
+        }
+
+    }
+
+    //네이티브 쿼리 테스트
+    @Test
+    public void searchPlaceBySearchWordAndNativeQueryTest(){
+        String searchWord = "으뜸";
+        List<PlaceListDto> placeListDtoList = placeService.searchPlaceBySearchWordAndNativeQuery(searchWord);
+        for (PlaceListDto placeListDto : placeListDtoList) {
+            System.out.println(placeListDto.getPlaceName());
+        }
+    }
+
+    @Test
+    public void searchPlaceByNativeQueryTest(){
+
         PlaceSearchRequestDto placeSearchRequestDto = new PlaceSearchRequestDto();
 //        placeSearchRequestDto.setCategoryId(31L);
 //        placeSearchRequestDto.setSearchWord("고려");
+        placeSearchRequestDto.setSearchWord("서산");
 
         placeSearchRequestDto.setDepartmentId(49);
 //        placeSearchRequestDto.setDepartmentId(1);
@@ -235,8 +260,62 @@ class PlaceServiceImplTest {
 //        placeSearchRequestDto.setDataType("dong");
 //        placeSearchRequestDto.setRegionId(2172L);
 
-                placeSearchRequestDto.setDataType("sigungu");
-        placeSearchRequestDto.setRegionId(123L);
+//                placeSearchRequestDto.setDataType("sigungu");
+//        placeSearchRequestDto.setRegionId(123L);
+
+//        placeSearchRequestDto.setDataType("sido");
+//        placeSearchRequestDto.setRegionId(9L);
+
+
+//f
+
+
+        PageRequest pageRequest = PageRequest.of(0, 50);
+
+        System.out.println("DTO 정보 ="+placeSearchRequestDto.toString());
+
+
+        List<PlaceListDto> result = placeService.searchPlaceByNativeQuery(placeSearchRequestDto,pageRequest);
+
+        System.out.println("결과 size  = "+ result.size());
+
+
+        //결과 출력 테스트
+        for (PlaceListDto placeListDto : result) {
+
+            List<PlaceDepartmentDto> placeDepartments = placeListDto.getPlaceDepartments();
+
+            System.out.println("place name ="+ placeListDto.getPlaceName()+"category="+ placeListDto.getCategoryName());
+
+            System.out.println("dongRegion = "+placeListDto.getDongName());
+            System.out.println("진료과목");
+            for (PlaceDepartmentDto placeDepartment : placeDepartments) {
+                System.out.println(placeDepartment.getDepartmentName());
+            }
+
+        }
+
+
+
+
+
+
+    }
+
+    @Test
+    public void getPlaceListDtoBySearchConditionsTest(){
+        PlaceSearchRequestDto placeSearchRequestDto = new PlaceSearchRequestDto();
+//        placeSearchRequestDto.setCategoryId(31L);
+        placeSearchRequestDto.setSearchWord("고려");
+
+//        placeSearchRequestDto.setDepartmentId(49);
+//        placeSearchRequestDto.setDepartmentId(1);
+
+//        placeSearchRequestDto.setDataType("dong");
+//        placeSearchRequestDto.setRegionId(2172L);
+
+//                placeSearchRequestDto.setDataType("sigungu");
+//        placeSearchRequestDto.setRegionId(123L);
 
 //        placeSearchRequestDto.setDataType("sido");
 //        placeSearchRequestDto.setRegionId(9L);
@@ -256,19 +335,19 @@ class PlaceServiceImplTest {
         System.out.println("결과 size  = "+result.size());
 
 
-        for (PlaceListDto placeListDto : result) {
-
-            List<PlaceDepartmentDto> placeDepartments = placeListDto.getPlaceDepartments();
-
-            System.out.println("place name ="+ placeListDto.getPlaceName()+"category="+ placeListDto.getCategoryName());
-
-            System.out.println("dongRegion = "+placeListDto.getDongName());
-            System.out.println("진료과목");
-            for (PlaceDepartmentDto placeDepartment : placeDepartments) {
-                System.out.println(placeDepartment.getDepartmentName());
-            }
-
-        }
+//        for (PlaceListDto placeListDto : result) {
+//
+//            List<PlaceDepartmentDto> placeDepartments = placeListDto.getPlaceDepartments();
+//
+//            System.out.println("place name ="+ placeListDto.getPlaceName()+"category="+ placeListDto.getCategoryName());
+//
+//            System.out.println("dongRegion = "+placeListDto.getDongName());
+//            System.out.println("진료과목");
+//            for (PlaceDepartmentDto placeDepartment : placeDepartments) {
+//                System.out.println(placeDepartment.getDepartmentName());
+//            }
+//
+//        }
 
     }
 

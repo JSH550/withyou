@@ -13,8 +13,9 @@ import com.js.withyou.data.entity.Category;
 import com.js.withyou.data.entity.Place.Place;
 import com.js.withyou.data.entity.Region.Sigungu;
 import com.js.withyou.repository.CategoryRepository;
-import com.js.withyou.repository.PlaceRepository;
-import com.js.withyou.repository.PlaceSearchRepository;
+import com.js.withyou.repository.Place.PlaceRepository;
+import com.js.withyou.repository.Place.PlaceSearchNativeRepository;
+import com.js.withyou.repository.Place.PlaceSearchRepository;
 import com.js.withyou.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,8 @@ public class PlaceServiceImpl implements PlaceService {
 
     private final PlaceSearchRepository placeSearchRepository;
 
+    private final PlaceSearchNativeRepository placeSearchNativeRepository;
+
     private final CategoryService categoryService;
 
 
@@ -62,11 +65,12 @@ public class PlaceServiceImpl implements PlaceService {
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public PlaceServiceImpl(SidoService sidoService, SigunguService sigunguService, PlaceRepository placeRepository, PlaceSearchRepository placeSearchRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
+    public PlaceServiceImpl(SidoService sidoService, SigunguService sigunguService, PlaceRepository placeRepository, PlaceSearchRepository placeSearchRepository, PlaceSearchNativeRepository placeSearchNativeRepository, CategoryService categoryService, CategoryRepository categoryRepository) {
         this.sidoService = sidoService;
         this.sigunguService = sigunguService;
         this.placeRepository = placeRepository;
         this.placeSearchRepository = placeSearchRepository;
+        this.placeSearchNativeRepository = placeSearchNativeRepository;
 
         this.categoryService = categoryService;
         this.categoryRepository = categoryRepository;
@@ -253,7 +257,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     /**
-     * @param sidoId DB 검색을 위한 시도(sido)의 primary key 입니다.
+     * @param sidoId   DB 검색을 위한 시도(sido)의 primary key 입니다.
      * @param pageable 페이지네이션을 위한 객체입니다.
      * @return
      */
@@ -304,7 +308,7 @@ public class PlaceServiceImpl implements PlaceService {
             if (categoryId == null || categoryId <= 0) {
                 categoryId = 16L;
             }
-             //지역 정보가 없을경우 종로구 데이터를 할당합니다.
+            //지역 정보가 없을경우 종로구 데이터를 할당합니다.
             if (sidoId == null || regionType.isEmpty()) {
                 regionType = "sigungu";
                 sidoId = 65L;//종로구
@@ -353,7 +357,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PlaceListDto> getPlaceListDtoBySearchConditions(PlaceSearchRequestDto placeSearchRequestDto,Pageable pageable) {
+    public List<PlaceListDto> getPlaceListDtoBySearchConditions(PlaceSearchRequestDto placeSearchRequestDto, Pageable pageable) {
 
         log.info("검색 메서드 진입.");
         //DB에서 조건에 맞는 레코드를 찾습니다.(동적쿼리)
@@ -363,10 +367,10 @@ public class PlaceServiceImpl implements PlaceService {
                 placeSearchRequestDto.getDepartmentId(),
                 placeSearchRequestDto.getDataType(),
                 placeSearchRequestDto.getRegionId()
-                ,pageable
+                , pageable
         );
 
-        log.info("페이지 정보 totalPage={},totalElement{}",placeList.getTotalPages(),placeList.getTotalElements());
+        log.info("페이지 정보 totalPage={},totalElement{}", placeList.getTotalPages(), placeList.getTotalElements());
         //Place 엔티티를 DTO로 변환합니다.
         List<PlaceListDto> placeListDtoList = placeList.stream().map(Place -> {
             PlaceListDto placeListDto = new PlaceListDto();
@@ -376,6 +380,54 @@ public class PlaceServiceImpl implements PlaceService {
 
         return placeListDtoList;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlaceListDto> searchPlaceByNativeQuery(PlaceSearchRequestDto placeSearchRequestDto, Pageable pageable) {
+
+        log.info("searchPlaceByNativeQuery 메서드 동작");
+
+        List<Place> placeList = placeSearchNativeRepository.searchPlaceByNativeQuery(
+                placeSearchRequestDto.getSearchWord(),
+                placeSearchRequestDto.getCategoryId(),
+                placeSearchRequestDto.getDepartmentId(),
+                placeSearchRequestDto.getDataType(),
+                placeSearchRequestDto.getRegionId()
+                , pageable);
+
+//        log.info("페이지 정보 totalPage={},totalElement{}", placeList.getTotalPages(), placeList.getTotalElements());
+
+        //Place 엔티티를 PlaceListDTo로 변환합니다.
+        List<PlaceListDto> placeListDtoList = placeList.stream().map(Place -> {
+            return new PlaceListDto().convertToPlaceListDto(Place);
+        }).collect(Collectors.toList());
+
+        return placeListDtoList;
+
+
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlaceListDto> searchPlaceBySearchWordAndNativeQuery(String searchWord) {
+
+        List<Place> placeList = placeSearchNativeRepository.searchPlaceBySearchWordAndNativeQuery(searchWord);
+
+        return placeList.stream()
+                .map(Place ->
+                        new PlaceListDto().convertToPlaceListDto(Place))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlaceListDto> searchPlaceBySearchWord(String searchWord) {
+
+        List<Place> placeList = placeRepository.findByPlaceNameContaining(searchWord);
+        return placeList.stream()
+                .map(Place ->
+                        new PlaceListDto().convertToPlaceListDto(Place))
+                .collect(Collectors.toList());}
 
     /**
      * 지역 종류(시도/시군구/읍면동)와 지역 id, 카테고리 id로 Page<Place>를 반환하는 메서드 입니다.
@@ -436,7 +488,7 @@ public class PlaceServiceImpl implements PlaceService {
             default -> throw new IllegalArgumentException("잘못된 지역 타입입니다.");
         }
         for (Place place : placePage) {
-            log.info("서비스계층, 찾은값=",place.getPlaceName());
+            log.info("서비스계층, 찾은값=", place.getPlaceName());
         }
         return placePage;
     }
@@ -577,12 +629,11 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    public List<PlaceListDto> getPlaceListDtoListByUserLocation(double latitude, double longitude,Pageable pageable) {
-
+    public List<PlaceListDto> getPlaceListDtoListByUserLocation(double latitude, double longitude, Pageable pageable) {
 
 
         //위도 경도 데이터 받아서
-        Page<Place> placePage = placeRepository.findPlacesByUserLocation(latitude,longitude,pageable);
+        Page<Place> placePage = placeRepository.findPlacesByUserLocation(latitude, longitude, pageable);
 
         List<PlaceListDto> placeListDtoList = placePage.stream().map(Place -> {
             PlaceListDto placeListDto = new PlaceListDto();

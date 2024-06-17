@@ -84,6 +84,39 @@ public interface PlaceService {
     List<PlaceListDto> getPlaceListDtoBySearchConditions(PlaceSearchRequestDto placeSearchRequestDto,Pageable pageable);
 
 
+    /**
+     * 검색조건을 만족하는 Place를 반환하는 메서드 입니다.
+     * placeName full text index 사용하여 Native query 동작합니다.
+     * @param placeSearchRequestDto 유저가 선택한 검색조건을 포함합니다. 지역, 검색어, 진료과목, 병원종류
+     * @param pageable 페이네이션 정보입니다.
+     * @return PlaceListDto List 형태로 반환합니다.
+     */
+    List<PlaceListDto> searchPlaceByNativeQuery(PlaceSearchRequestDto placeSearchRequestDto,Pageable pageable);
+
+
+
+
+    /**
+     * 검색어로 Place를 찾아 반환하는 메서드 입니다.
+     * placeName full text index 사용하여 Native query 동작합니다.
+     * @param searchWord
+     * @return
+     */
+    List<PlaceListDto> searchPlaceBySearchWordAndNativeQuery(String searchWord);
+
+
+    /**
+     * 검색어로 Place를 찾아 반환하는 메서드 입니다.
+     *  spring dataJPA를 사용합니다.
+     * @param searchWord
+     * @return
+     */
+    List<PlaceListDto> searchPlaceBySearchWord(String searchWord);
+
+
+
+
+
 
     List<PlaceDto> getPlaceBySigungus(List<SigunguDto> sigunguDtoList);
 
