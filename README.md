@@ -5,11 +5,17 @@
 ### Front End
 - JavaScript
 - Bootstrap
-- Naver 지도 API
+- Kakao 지도 API
 
 ### Back End
 - Spring Boot
 - Spring Data JPA
 - Spring Security
+- 
 ### DB
 - MySQL
+
+
+### Others
+- Google cloud(OAuth2)
+- Naver cloud(OAuth2)
